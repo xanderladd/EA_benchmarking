@@ -10,4 +10,4 @@ if test "" = "yes" ; then
 else
 	NRNIV="${NRNBIN}nrniv"
 fi
-"${NRNIV}" -dll "/global/cscratch1/sd/zladd/axonstandardized/playground/neuroGPU_tuned/neuron_files/x86_64/.libs/libnrnmech.so" "$@"
+"${NRNIV}" -dll "/global/cscratch1/sd/zladd/benchmarking/neuron_genetic_alg/neuron_files/allen/x86_64/.libs/libnrnmech.so" "$@"

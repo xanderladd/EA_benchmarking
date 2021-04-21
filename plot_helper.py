@@ -183,7 +183,7 @@ def plot_stim_volts_pair(stim, volts, title_stim, title_volts, file_path_to_save
         
 # Running a single volt
 def run_single_volts(param_set, stim_data, ntimestep = 10000, dt = 0.02):
-    run_file = './neuron_genetic_alg/neuron_files/bbp/run_model_cori.hoc'
+    run_file = './neuron_genetic_alg/neuron_files/allen/run_model_cori.hoc'
     h.load_file(run_file)
     total_params_num = len(param_set)
     timestamps = np.array([dt for i in range(ntimestep)])

@@ -142,7 +142,11 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
         for i in range(len(param_values)):
             curr_opt_ind = self.opt_ind[i]
             input_values[curr_opt_ind] = param_values[i]
+        input_values[0] = self.orig_params
+        print(input_values.shape)
+        print(1/0)
         data_volts_list = run_model(input_values, self.opt_stim_list)
+        #np.savetxt("targetVolts.csv", data_volts_list, delimiter=",")
         score = evaluate_score_function(self.opt_stim_list, self.target_volts_list, data_volts_list, self.weights)
 #         ap_tune_score = ap_tune(input_values, self.ap_tune_target, self.ap_tune_stim_name, self.ap_tune_weight)
         return [score] #+ ap_tune_score] NOT USING AP TUNE

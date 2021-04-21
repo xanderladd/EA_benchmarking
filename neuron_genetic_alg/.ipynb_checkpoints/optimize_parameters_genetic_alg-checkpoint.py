@@ -2,8 +2,8 @@ import bluepyopt as bpop
 
 
 # when things are setup, make this a conditional import
-#import hoc_evaluator_allen as hoc_ev
-import hoc_evaluator as hoc_ev
+import hoc_evaluator_allen as hoc_ev
+#import hoc_evaluator as hoc_ev
 
 import bluepyopt.deapext.algorithms as algo
 import pickle
