@@ -75,7 +75,7 @@ The folling environment variables are considered:
     BLUEPYOPT_SEED: The seed used for initial randomization
         '''))
     parser.add_argument('--start', action="store_true")
-    parser.add_argument('--continu', action="store_false", default=False)
+    parser.add_argument('--continu', type=bool, default=False)
     parser.add_argument('--checkpoint', required=False, default=None,
                         help='Checkpoint pickle to avoid recalculation')
     parser.add_argument('--offspring_size', type=int, required=False, default=2,

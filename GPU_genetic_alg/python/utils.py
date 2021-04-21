@@ -169,6 +169,9 @@ def convert_allen_data(opt_stim_name_list, stim_file, dts):
             os.remove(old_stim)
             os.remove(old_time)
     for i in range(len(opt_stim_name_list)):
+        # remove this somehow
+        if len(opt_stim_name_list[i].decode('ascii')) > 8:
+            continue
         stim = opt_stim_name_list[i].decode("utf-8")
         dt = stim_file[stim+'_dt'][:][0]# refactor this later to be read or set to .02 if not configured
         dts.append(dt)

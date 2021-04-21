@@ -156,7 +156,7 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
                 self.fixed[param_idx] = self.orig_params[param_idx]
 
         self.weights = opt_weight_list
-        self.opt_stim_list = [e.decode('ascii') for e in opt_stim_name_list]
+        self.opt_stim_list = [e.decode('ascii') for e in opt_stim_name_list if len(e.decode('ascii')) < 8 ]
         self.objectives = [bpop.objectives.Objective('Weighted score functions')]
         if global_rank == 0:
             #io_start = time.time()
@@ -164,7 +164,7 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
             #io_end = time.time()
             #logging.info("IO:: " + str(io_end - io_start))
             self.target_volts_list = [target_volts_hdf5[s][:] for s in self.opt_stim_list]#np.genfromtxt("targetVolts.csv", delimiter=",")#self.make_target_volts(realOrig, self.opt_stim_list)
-            #self.make_target_volts(realOrig, self.opt_stim_list)
+            self.make_target_volts(realOrig, self.opt_stim_list)
         else:
             self.target_volts_list = None
         self.target_volts_list = comm.bcast(self.target_volts_list, root=0)
@@ -198,7 +198,7 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
                 else:
                     data_volts_list = np.append(data_volts_list, self.getVolts(gpuId),axis=0)
                 print(data_volts_list.shape)
-        np.savetxt("targetVoltsGPU.csv", data_volts_list, delimiter=",")
+        np.savetxt("targetVoltsGPUNew.csv", data_volts_list, delimiter=",")
         print(1/0)
         return data_volts_list
 
@@ -286,9 +286,16 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
             j = fxnNStim[1]
             f.create_dataset("data_volt{}{}".format(i,j), data=self.data_volts_list[i % nGpus,:,:].astype(np.float32))
             f.create_dataset("target_volt{}{}".format(i,j), data=self.target_volts_list[i].astype(np.float32))
-            #if global_rank == 0:
-#             cur.execute("insert into test (arr) values (?)", (self.data_volts_list[i % nGpus,:,:].astype(np.float32), ))
-#             con.commit()
+            
+            try:
+                
+                trasformation_const = h5py.File(scores_path+self.opt_stim_list[i]+'_scores.hdf5', 'r')['transformation_const_'+score_function_ordered_list[j].decode('ascii')][:]
+            except:
+                all_scores = os.listdir("../../scores")
+                choice = np.random.choice(all_scores)
+                trasformation_const = h5py.File(scores_path+choice, 'r')['transformation_const_'+score_function_ordered_list[j].decode('ascii')][:]
+                
+
 
             
             argDict = {   "i": i,
@@ -297,7 +304,7 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
                 #"target": self.target_volts_list[i].astype(np.float32), # 10k
                 "curr_sf": score_function_ordered_list[j].decode('ascii'),
                 "weight": self.weights[len(score_function_ordered_list)*i + j],
-                "transformation": h5py.File(scores_path+self.opt_stim_list[i]+'_scores.hdf5', 'r')['transformation_const_'+score_function_ordered_list[j].decode('ascii')][:],
+                "transformation": trasformation_const,
                 "dt": self.dts[i], #TODO: revisit hacking this
                 "start": time.time(),
             }
@@ -383,7 +390,7 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
             for reinsert_idx in self.fixed.keys():
                 param_values = np.insert(np.array(param_values), reinsert_idx, self.fixed[reinsert_idx], axis = 1)
                 full_params = param_values
-            param_values[0] =  np.array(orig_params)
+            #param_values[0] =  np.array(orig_params)
             #param_values[1] =  np.array(orig_params)
 
             #param_values[5] =  np.array(orig_params)
@@ -434,14 +441,14 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
             end_times.append(time.time())
             print("ADDED END TIME for ", i)
             shaped_volts = self.getVolts(i)
-            if global_rank == 0 and i > 2 and i < 5:
-                import matplotlib.pyplot as plt
-                plt.plot(shaped_volts[0,:])
-                plt.savefig("test_p{}".format(i))
-                plt.close()
-                print(param_values)
-                print(orig_params)
-                print(orig_params == param_values)
+#             if global_rank == 0 and i > 2 and i < 5:
+#                 import matplotlib.pyplot as plt
+#                 plt.plot(shaped_volts[0,:])
+#                 plt.savefig("test_p{}".format(i))
+#                 plt.close()
+#                 print(param_values)
+#                 print(orig_params)
+#                 print(orig_params == param_values)
 #                 print("##########################################")
 #             if i > 6:
 #                 print(1/0)

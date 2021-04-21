@@ -75,7 +75,7 @@ The folling environment variables are considered:
     BLUEPYOPT_SEED: The seed used for initial randomization
         '''))
     parser.add_argument('--start', action="store_true")
-    parser.add_argument('--continu', action="store_false", default=False)
+    parser.add_argument('--continu', type=bool, default=False)
     parser.add_argument('--checkpoint', required=False, default=None,
                         help='Checkpoint pickle to avoid recalculation')
     parser.add_argument('--offspring_size', type=int, required=False, default=2,
@@ -145,8 +145,6 @@ def main():
         eta=20,
         mutpb=0.3,
         cxpb=0.7)
-    print(args.checkpoint, args.continu)
-    print(1/0)
     pop, hof, log, hst = opt.run(max_ngen=args.max_ngen,
         offspring_size=args.offspring_size,
         continue_cp=args.continu,
