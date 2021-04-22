@@ -89,8 +89,8 @@ def check_ap_at_zero(stim_ind, volts, opt_stim_name_list, stim_file):
     Kyung function to check if a volt should be penalized for having an AP before there 
     should be one. Modified to take in "volts" as a list of individuals instead of "volt"
     """
-    print(len(list([e.decode('ascii') for e in opt_stim_name_list])),int(stim_ind) )
-    stim_name = list([e.decode('ascii') for e in opt_stim_name_list])[int(stim_ind)]
+    print(len(list([e for e in opt_stim_name_list])),int(stim_ind) )
+    stim_name = list([e for e in opt_stim_name_list])[int(stim_ind)]
     stim = stim_file[stim_name][:]
     first_zero_ind = get_first_zero(stim)
     nindv =volts.shape[0]
@@ -170,9 +170,9 @@ def convert_allen_data(opt_stim_name_list, stim_file, dts):
             os.remove(old_time)
     for i in range(len(opt_stim_name_list)):
         # remove this somehow
-        if len(opt_stim_name_list[i].decode('ascii')) > 8:
+        if len(opt_stim_name_list[i]) > 8:
             continue
-        stim = opt_stim_name_list[i].decode("utf-8")
+        stim = opt_stim_name_list[i]
         dt = stim_file[stim+'_dt'][:][0]# refactor this later to be read or set to .02 if not configured
         dts.append(dt)
         f = open ("../Data/times{}.csv".format(i), 'w')

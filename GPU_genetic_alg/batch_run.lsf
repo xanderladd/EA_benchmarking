@@ -1,0 +1,28 @@
+#!/bin/bash
+#BSUB -nnodes 12
+#BSUB -W 30
+#BSUB -P AST153
+#BSUB -alloc_flags "smt4 nvme"
+#-BSUB -J janA
+#BSUB -q batch
+
+# load modules
+module load cuda
+
+#determine number of nodes and total procs
+nprocspn=6
+nnodes=$(cat ${LSB_DJOB_HOSTFILE} | sort | uniq | grep -v login | grep -v batch | wc -l)
+nprocs=$(( ${nnodes} * ${nprocspn} ))
+echo 'M: nprocs=',$nprocs
+
+#run
+cat ${LSB_DJOB_HOSTFILE} | sort | uniq | grep -v login | grep -v batch > host_list
+
+echo "starting mascarpone" `date`
+jsrun  -n ${nnodes} -g 6 -c 42 -a ${nprocspn} --bind=proportional-packed:7 --launch_distribution=packed stdbuf -o0  ./oneTaskB.sh 
+
+
+echo "finished mascarpone" `date`
+
+# attic --stdio_mode=prepended   
+# attic2: jsrun xxx | & tee out.fp16.lag0.${LSB_JOBID}

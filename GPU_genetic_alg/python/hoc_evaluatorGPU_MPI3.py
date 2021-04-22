@@ -27,13 +27,13 @@ import multiprocessing
 import csv
 import ap_tuner as tuner
 import logging
-from mpi4py import MPI
+#from mpi4py import MPI
 #set_start_method("spawn")
 #set_start_method("forkserver")
 #logging.debug('This message should go to the log file')
 logging.info('So should this')
 logging.warning('And this, too')
-cpu_str = os.environ['SLURM_JOB_CPUS_PER_NODE']
+cpu_str = 80#os.environ['SLURM_JOB_CPUS_PER_NODE']
 SLURM_CPUS = 80#int(re.search(r'\d+', cpu_str).group() )
 nCpus =  SLURM_CPUS#multiprocessing.cpu_count()
 logging.info("using nCpus: " + str(nCpus))
@@ -67,6 +67,7 @@ global_rank = comm.Get_rank()
 size = comm.Get_size()
 
 
+
 def adapt_array(arr):
     """
     http://stackoverflow.com/a/31312102/190597 (SoulNibbler)
@@ -96,8 +97,8 @@ if os.path.isfile("example{}.db".format(global_rank)):
 # cur.execute("create table test (arr array)")
 # cur.close()
 
-if not os.path.isdir("/tmp/Data"):
-    os.mkdir("/tmp/Data")
+# if not os.path.isdir("/tmp/Data"):
+#     os.mkdir("/tmp/Data")
 
 def stim_swap(idx, i):
     """
@@ -156,7 +157,7 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
                 self.fixed[param_idx] = self.orig_params[param_idx]
 
         self.weights = opt_weight_list
-        self.opt_stim_list = [e.decode('ascii') for e in opt_stim_name_list if len(e.decode('ascii')) < 8 ]
+        self.opt_stim_list = [e for e in opt_stim_name_list if len(e) < 8 ]
         self.objectives = [bpop.objectives.Objective('Weighted score functions')]
         if global_rank == 0:
             #io_start = time.time()
@@ -164,10 +165,10 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
             #io_end = time.time()
             #logging.info("IO:: " + str(io_end - io_start))
             self.target_volts_list = [target_volts_hdf5[s][:] for s in self.opt_stim_list]#np.genfromtxt("targetVolts.csv", delimiter=",")#self.make_target_volts(realOrig, self.opt_stim_list)
-            self.make_target_volts(realOrig, self.opt_stim_list)
+            #self.make_target_volts(realOrig, self.opt_stim_list)
         else:
             self.target_volts_list = None
-        self.target_volts_list = comm.bcast(self.target_volts_list, root=0)
+        #self.target_volts_list = comm.bcast(self.target_volts_list, root=0)
         
         self.dts = []
         self.num_gen = 0
@@ -252,6 +253,7 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
         ---------------------------------------------------------
         p_object: process object that stops when neuroGPU done
         """
+        print("Launched --> ", stim_ind, " at --> ", global_rank)
         volts_fn = vs_fn + str(stim_ind) + "_" +  str(global_rank) + '.dat'  
         if os.path.exists(volts_fn):
             print("removing ", volts_fn)#, " from ", global_rank)
@@ -279,7 +281,7 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
         '''
         fxnsNStims = self.top_SFs(run_num) # 52 stim-sf combinations (stim#,sf#)
         args = []
-        f = h5py.File("/tmp/{}.hdf5".format(global_rank), "w")
+        f = h5py.File("../Data/tmp/{}.hdf5".format(global_rank), "w")
 
         for fxnNStim in fxnsNStims:
             i = fxnNStim[0]
@@ -289,11 +291,11 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
             
             try:
                 
-                trasformation_const = h5py.File(scores_path+self.opt_stim_list[i]+'_scores.hdf5', 'r')['transformation_const_'+score_function_ordered_list[j].decode('ascii')][:]
+                trasformation_const = h5py.File(scores_path+self.opt_stim_list[i]+'_scores.hdf5', 'r')['transformation_const_'+score_function_ordered_list[j]][:]
             except:
                 all_scores = os.listdir("../../scores")
                 choice = np.random.choice(all_scores)
-                trasformation_const = h5py.File(scores_path+choice, 'r')['transformation_const_'+score_function_ordered_list[j].decode('ascii')][:]
+                trasformation_const = h5py.File(scores_path+choice, 'r')['transformation_const_'+score_function_ordered_list[j]][:]
                 
 
 
@@ -302,7 +304,7 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
                 "j": j,
                 #"data volt" : self.data_volts_list[i % nGpus,:,:].astype(np.float32), # can be really big, like 1000,10000
                 #"target": self.target_volts_list[i].astype(np.float32), # 10k
-                "curr_sf": score_function_ordered_list[j].decode('ascii'),
+                "curr_sf": score_function_ordered_list[j],
                 "weight": self.weights[len(score_function_ordered_list)*i + j],
                 "transformation": trasformation_const,
                 "dt": self.dts[i], #TODO: revisit hacking this
@@ -438,6 +440,7 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
         for i in range(0,nstims):
             idx = i % (nGpus)
             p_objects[i].wait() #wait to get volts output from previous run then read and stack
+            #print(p_objects[i].wait(), "P OBJEECTS IIII for ", i, "----------")
             end_times.append(time.time())
             print("ADDED END TIME for ", i)
             shaped_volts = self.getVolts(i)

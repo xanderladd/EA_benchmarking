@@ -10,12 +10,14 @@ import argparse
 import time
 import textwrap
 import os
+
 from mpi4py import MPI
 import multiprocessing
 # set up environment variables for MPI
+
 comm = MPI.COMM_WORLD
 global_rank = comm.Get_rank()
-size = comm.Get_size()
+size = os.environ['OMPI_COMM_WORLD_LOCAL_SIZE']#comm.Get_size()
 
 
 import logging.config
@@ -45,16 +47,16 @@ logging.info("absolute start : " + str(time.time()) + " from rank" + str(global_
 
 
 
-if size > 1:
-    logging.info("USING MPI : TRUE")
-    import hoc_evaluatorGPU_MPI3 as hoc_ev
-else:
-    logging.info("USING MPI : FALSE")
-    import hoc_evaluatorGPU_BBP_par as hoc_ev
+#if size > 1:
+logging.info("USING MPI : TRUE")
+import hoc_evaluatorGPU_MPI3 as hoc_ev
+# else:
+#     logging.info("USING MPI : FALSE")
+#     import hoc_evaluatorGPU_BBP_par as hoc_ev
 
     #testing
-    nGpus = len([devicenum for devicenum in os.environ['CUDA_VISIBLE_DEVICES'] if devicenum != ","])
-    logging.info("nGPUS :" + str(nGpus))
+nGpus = len([devicenum for devicenum in os.environ['CUDA_VISIBLE_DEVICES'] if devicenum != ","])
+logging.info("nGPUS :" + str(nGpus))
     #assert nGpus == 8 # this only works if you have 8 gpus, if you are using 6 run the the tests instead
 
 

@@ -34,7 +34,7 @@
 ################################################################################
 
 # Location of the CUDA Toolkit
-CUDA_PATH ?= /cm/extra/apps/CUDA.linux86-64/10.0.130_410.48
+CUDA_PATH ?= /sw/summit/cuda/10.1.243/
 
 ##############################
 # start deprecated interface #

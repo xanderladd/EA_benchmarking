@@ -49,7 +49,7 @@ ap_tune_weight = 0
 params_opt_ind = [0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
 data_dir = '../Data/allenData/'
 run_dir = '../bin'
-vs_fn = '/tmp/Data/VHotP'
+vs_fn = '../Data/VHotP'
 stim_file = h5py.File(stims_path, 'r')
 target_volts_hdf5 = h5py.File(target_volts_path, 'r')
 
@@ -58,7 +58,8 @@ templateCSV = "../params/params_bbp_full_gpu_tuned_10_based.csv"
 # Number of timesteps for the output volt.
 ntimestep = 10000
 
-stim_names = list([e.decode('ascii') for e in opt_stim_name_list if len(e.decode('ascii')) < 7])
+
+stim_names = list([e for e in opt_stim_name_list])
 
 custom_score_functions = [
                     'chi_square_normal',\

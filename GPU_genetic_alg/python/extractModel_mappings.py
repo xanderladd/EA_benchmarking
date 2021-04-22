@@ -2,7 +2,7 @@ from json import load, dumps, dump
 from csv import reader, writer
 import numpy as np
 from os.path import exists
-from neuron import h
+#from neuron import h
 import time
 #from extractModel import run_extract
 import importlib

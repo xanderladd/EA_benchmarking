@@ -621,7 +621,7 @@ void RunByModelP(int argc, int stim_ind, int globalRank) { // YYY add void
         enablePeerAccess(p2pCapableGPUs,np2p);
     }
     else{
-    p2pCapableGPUs = {&curr_dev};
+    p2pCapableGPUs = &curr_dev;
     np2p = 0;
     }
   stEfork2Main(stim,sim, ParamsM,InitStatesM, TheMMat, V,CompDepth,CompFDepth,NSets, p2pCapableGPUs,np2p,  stim_ind, globalRank);

@@ -21,7 +21,6 @@ import myGlobals
 # hack to remove eventually...imagine doing a getattr when you have the function
 # and can just do an eval :O
 thismodule = sys.modules[__name__]
-import sqlite3
 
 comp_width_dict = {}
 comp_height_dict = {}
@@ -34,11 +33,11 @@ global_rank = comm.Get_rank()
 size = comm.Get_size()
 
 #if size == 1:
-cpu_str = os.environ['SLURM_JOB_CPUS_PER_NODE']
-SLURM_CPUS = int(re.search(r'\d+', cpu_str).group() )
+#cpu_str = os.environ['SLURM_JOB_CPUS_PER_NODE']
+#SLURM_CPUS = int(re.search(r'\d+', cpu_str).group() )
 # else:
 #     SLURM_CPUS = int(os.environ['SLURM_JOB_CPUS_PER_NODE'][:1])
-nCpus =  SLURM_CPUS#multiprocessing.cpu_count()
+nCpus =  44#multiprocessing.cpu_count()
 # These constants exist for efel features
 time_stamps =  10000
 starting_time_stamp = 1000
@@ -575,7 +574,7 @@ def eval_stim_sf_pair(args):
         if global_rank != 10:
             logging.info("process {} is {} and started at {}".format(os.getpid(), curr_sf, timer.time()))
         io_start = timer.time()
-        f =h5py.File("/tmp/{}.hdf5".format(global_rank),"r")
+        f =h5py.File("../Data/tmp/{}.hdf5".format(global_rank),"r")
         curr_data_volt =f["data_volt{}{}".format(i,j)][:]
         curr_target_volt =f["target_volt{}{}".format(i,j)][:]
         io_end = timer.time()

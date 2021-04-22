@@ -583,9 +583,9 @@ void stEfork2Main(Stim stim, Sim sim, MYFTYPE* ParamsM, MYFTYPE* InitStatesM, HM
   cudaGetDeviceCount(&num_devices);
   printf("Saving w/ rank %d on device %d", globalRank, curr_dev);
     char FileName[300];
-      //sprintf(FileName, "/tmp/Data/VHotP%d.dat",curr_dev + (globalRank*num_devices));
-      sprintf(FileName, "/tmp/Data/VHotP%d_%d.dat",stim_ind,globalRank);
-      //sprintf(FileName, "/tmp/Data/VHotP%d.dat",curr_dev);
+      //sprintf(FileName, "../Data/VHotP%d.dat",curr_dev + (globalRank*num_devices));
+      sprintf(FileName, "../Data/VHotP%d_%d.dat",stim_ind,globalRank);
+      //sprintf(FileName, "../Data/VHotP%d.dat",curr_dev);
       SaveArrayToFile(FileName, NSets*Nt*stim.NStimuli*sim.NRecSites, Vhots);
 }
 
