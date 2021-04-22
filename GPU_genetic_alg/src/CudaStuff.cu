@@ -532,6 +532,7 @@ void stEfork2Main(Stim stim, Sim sim, MYFTYPE* ParamsM, MYFTYPE* InitStatesM, HM
   MYDTYPE prevRuns = 0;
   MYDTYPE currRun;
   if (NSets > np2p) {
+    printf("curr! run! is ! %d",currRun);
     currRun = ceil(NSets / np2p);
   }
   else { currRun = NSets; };

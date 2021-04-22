@@ -21,7 +21,6 @@ from concurrent.futures import ProcessPoolExecutor as Pool
 from concurrent.futures import ProcessPoolExecutor
 import sqlite3
 import io
-
 #from ray.util.multiprocessing import Pool
 import multiprocessing
 import csv
@@ -86,19 +85,6 @@ def convert_array(text):
 if os.path.isfile("example{}.db".format(global_rank)):
     os.remove("example{}.db".format(global_rank))
 
-# # Converts np.array to TEXT when inserting
-# sqlite3.register_adapter(np.ndarray, adapt_array)
-
-# # Converts TEXT to np.array when selecting
-# sqlite3.register_converter("array", convert_array)
-
-# con = sqlite3.connect("example{}.db".format(global_rank), detect_types=sqlite3.PARSE_DECLTYPES)
-# cur = con.cursor()
-# cur.execute("create table test (arr array)")
-# cur.close()
-
-# if not os.path.isdir("/tmp/Data"):
-#     os.mkdir("/tmp/Data")
 
 def stim_swap(idx, i):
     """
@@ -257,8 +243,10 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
         volts_fn = vs_fn + str(stim_ind) + "_" +  str(global_rank) + '.dat'  
         if os.path.exists(volts_fn):
             print("removing ", volts_fn)#, " from ", global_rank)
-            #os.remove(volts_fn)
-        p_object = subprocess.Popen(['../bin/neuroGPU',str(stim_ind), str(global_rank)])#, #stdout=subprocess.DEVNULL,  stderr=subprocess.STDOUT)
+            os.remove(volts_fn)
+        p_object = subprocess.Popen(['../bin/neuroGPU',str(stim_ind), str(global_rank)], stderr=subprocess.STDOUT)
+        #p_object = os.system('../bin/neuroGPU {} {}'.format(str(stim_ind),str(global_rank)))
+        time.sleep(1) # prevent collision from happening in init?
         return p_object
     
 
@@ -295,16 +283,15 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
             except:
                 all_scores = os.listdir("../../scores")
                 choice = np.random.choice(all_scores)
-                trasformation_const = h5py.File(scores_path+choice, 'r')['transformation_const_'+score_function_ordered_list[j]][:]
+                trasformation_const = h5py.File(scores_path+choice, 'r')['transformation_const_'+score_function_ordered_list[j].decode('ascii')][:]
                 
 
 
-            
             argDict = {   "i": i,
                 "j": j,
                 #"data volt" : self.data_volts_list[i % nGpus,:,:].astype(np.float32), # can be really big, like 1000,10000
                 #"target": self.target_volts_list[i].astype(np.float32), # 10k
-                "curr_sf": score_function_ordered_list[j],
+                "curr_sf": score_function_ordered_list[j].decode('ascii')[:],
                 "weight": self.weights[len(score_function_ordered_list)*i + j],
                 "transformation": trasformation_const,
                 "dt": self.dts[i], #TODO: revisit hacking this
@@ -439,8 +426,12 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
         # evlauate sets of volts and     
         for i in range(0,nstims):
             idx = i % (nGpus)
-            p_objects[i].wait() #wait to get volts output from previous run then read and stack
-            #print(p_objects[i].wait(), "P OBJEECTS IIII for ", i, "----------")
+            exit_code = p_objects[i].wait() #wait to get volts output from previous run then read and stack
+            if exit_code != 0:
+                print( p_objects[i].stderr, "      STD ERR")
+            print(p_objects[i].wait(), "P OBJEECTS IIII for ", i, "----------")
+            if not p_objects[i].poll():
+                p_objects[i].terminate()
             end_times.append(time.time())
             print("ADDED END TIME for ", i)
             shaped_volts = self.getVolts(i)
