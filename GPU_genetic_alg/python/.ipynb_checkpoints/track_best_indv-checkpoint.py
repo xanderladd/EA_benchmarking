@@ -15,7 +15,7 @@ import pandas as pd
 import argparse 
 #os.chdir("NeuroGPU/NeuroGPU_Base/VS/pyNeuroGPU_win2/NeuroGPU6/python/")
 from config.allen_config import *
-
+import utils
 
 
 parser = argparse.ArgumentParser(
@@ -65,34 +65,6 @@ def readParamsCSV(fileName):
     return paramsList
 
 
-def prepare_data():
-    """
-    Function that sets up our new allen data every run. It reads and writes every stimi
-    and timesi and removes previous ones. Using csv writer to write timesi so it reads well.
-    """
-    for i in range(len(opt_stim_name_list)):
-        old_stim = "../Data/Stim_raw{}.csv"
-        old_time = "../Data/times_{}.csv"
-        if os.path.exists(old_stim) :
-            os.remove(old_stim)
-            os.remove(old_time)
-    for i in range(len(opt_stim_name_list)):
-        stim = opt_stim_name_list[i].decode("utf-8")
-        dt = stim_file[stim+'_dt'][:][0]
-        f = open ("../Data/times{}.csv".format(i), 'w')
-        wtr = csv.writer(f, delimiter=',', lineterminator='\n')
-        current_times = [dt for i in range(ntimestep)]
-        wtr.writerow(current_times)
-        f.close()
-        
-        # Fix this saving, loading and then saving at some point...
-        np.savetxt("../Data/Stim_raw{}.csv".format(i), 
-                   stim_file[stim][:],
-                   delimiter=",")
-        file = np.genfromtxt("../Data/Stim_raw{}.csv".format(i))
-        writer = csv.writer(open("../Data/Stim_raw{}.csv".format(i), 'w'))
-        writer.writerow(file)
-        
         
 def run_model(real_ind):
     """
@@ -154,18 +126,26 @@ def getVolts(idx):
 
 def main():
     nstims = 18 # only running first 8 stims
-    prepare_data() # setting up directory to have times / stims
-
+    #prepare_data() # setting up directory to have times / stims
+    utils.convert_allen_data(opt_stim_name_list, stim_file, [])
 
     if args.indv_path:
         with (open(args.indv_path, "rb")) as openfile:
             all_param_values = pickle.load(openfile)
         param_values = all_param_values[-1]
-        param_values = np.insert(np.array(param_values),1, orig_params[1]).reshape(-1,1).T
+        param_values = np.array(param_values)
+        if len(param_values) == 13:
+            param_values = np.insert(np.array(param_values),1, orig_params[1]).reshape(-1,1).T
+        elif len(param_values) == 14:
+            param_values[1] = -param_values[1]
+        if len(param_values.shape) == 1:
+            param_values = param_values.reshape(-1,1).T
     else: 
         param_values =  np.array(orig_params).reshape(1,-1)
         param_values = np.repeat(param_values, 10, axis=0) # 10 copies of orig params
         print(param_values.shape,  " : param value shape")
+
+    print(param_values)
        
     ###### CREATE MAPPING ################# 
     allparams_from_mapping(param_values)
@@ -179,13 +159,14 @@ def main():
 
 #     # run neuroGPU -- set up for either ONE gpu or 8
     #if nGpus == 1: 
-    for i in range(1,nstims):
+    for i in range(1,16):#nstims):
         if i != 0:
             # swaps stim0.csv and times0.csv for stimi.csv and timesi.csv
             #stim_swap(0,i)
             # run ...  wait is built into run model
             run_model(i)
             data = nrnMread("/tmp/Data/VHotP{}_0.dat".format(i))
+            print(np.max(data))
             cache.create_dataset('volts/volts{}'.format(i),data= data )
 
         else: 

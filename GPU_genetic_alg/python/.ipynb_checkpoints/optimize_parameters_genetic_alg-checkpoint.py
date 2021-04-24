@@ -45,19 +45,12 @@ logging.info("absolute start : " + str(time.time()) + " from rank" + str(global_
 
 
 
-if size > 1:
-    logging.info("USING MPI : TRUE")
-    import hoc_evaluatorGPU_MPI3 as hoc_ev
-else:
-    logging.info("USING MPI : FALSE")
-    import hoc_evaluatorGPU_BBP_par as hoc_ev
+logging.info("USING MPI : TRUE")
+import hoc_evaluatorGPU_MPI3 as hoc_ev
 
-    #testing
-    nGpus = len([devicenum for devicenum in os.environ['CUDA_VISIBLE_DEVICES'] if devicenum != ","])
-    logging.info("nGPUS :" + str(nGpus))
-    #assert nGpus == 8 # this only works if you have 8 gpus, if you are using 6 run the the tests instead
-
-
+nGpus = len([devicenum for devicenum in os.environ['CUDA_VISIBLE_DEVICES'] if devicenum != ","])
+logging.info("nGPUS :" + str(nGpus))
+    
 gen_counter = 0
 best_indvs = []
 cp_freq = 1

@@ -1,14 +1,14 @@
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].soma[0]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
 ko0_k_ion = 2.500000
 cai0_ca_ion = 0.000050
 cao0_ca_ion = 2.000000
-ica = -11.661599
-dica_dv_ = 0.056825
+ica = -0.000001
+dica_dv_ = 0.000000
 m_Ca_HVA = 0.000182
 h_Ca_HVA = 0.580751
 m_Ca_LVAst = 0.015267
@@ -21,573 +21,573 @@ zTau_SK_E2 = 1.000000
 z_SK_E2 = 0.000033
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[0]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[1]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[2]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[3]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[4]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[5]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[6]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[7]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[8]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[9]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[10]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[11]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[12]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[13]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[14]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[15]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[16]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[17]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[18]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[19]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[20]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[21]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[22]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[23]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[24]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[25]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[26]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[27]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[28]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[29]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[30]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[31]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[32]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[33]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[34]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[35]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[36]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[37]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[38]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[39]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[40]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[41]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[42]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[43]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[44]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[45]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[46]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[47]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[48]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[49]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[50]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[51]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[52]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[53]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[54]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[55]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[56]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[57]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[58]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[59]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[60]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[61]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[62]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[63]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[64]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[65]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[66]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[67]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[68]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[69]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[70]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[71]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[72]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[73]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[74]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[75]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[76]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[77]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[78]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[79]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[80]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[81]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[82]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[83]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[84]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[85]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[86]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[87]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[88]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[89]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[90]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[91]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[92]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[93]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[94]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[95]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[96]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[97]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[98]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[99]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[100]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[101]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[102]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[103]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[104]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[105]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[106]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[107]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[108]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[109]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[110]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[111]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].dend[112]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 ehcn_Ih = -45.000000
 m_Ih = 0.011059
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[0]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -599,8 +599,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[1]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -612,8 +612,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[2]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -625,8 +625,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[3]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -638,8 +638,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[4]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -651,8 +651,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[5]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -664,8 +664,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[6]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -677,8 +677,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[7]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -690,8 +690,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[8]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -703,8 +703,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[9]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -716,8 +716,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[10]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -729,8 +729,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[11]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -742,8 +742,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[12]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -755,8 +755,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[13]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -768,8 +768,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[14]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -781,8 +781,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[15]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -794,8 +794,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[16]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -807,8 +807,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[17]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -820,8 +820,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[18]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -833,8 +833,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[19]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -846,8 +846,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[20]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -859,8 +859,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[21]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -872,8 +872,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[22]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -885,8 +885,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[23]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -898,8 +898,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[24]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -911,8 +911,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[25]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -924,8 +924,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[26]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -937,8 +937,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[27]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -950,8 +950,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[28]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -963,8 +963,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[29]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -976,8 +976,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[30]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -989,8 +989,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[31]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1002,8 +1002,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[32]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1015,8 +1015,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[33]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1028,8 +1028,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[34]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1041,8 +1041,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[35]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1054,8 +1054,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[36]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1067,8 +1067,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[37]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1080,8 +1080,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[38]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1093,8 +1093,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[39]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1106,8 +1106,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[40]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1119,8 +1119,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[41]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1132,8 +1132,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[42]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1145,8 +1145,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[43]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1158,8 +1158,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[44]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1171,8 +1171,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[45]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1184,8 +1184,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[46]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1197,8 +1197,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[47]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1210,8 +1210,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[48]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1223,8 +1223,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[49]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1236,8 +1236,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[50]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1249,8 +1249,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[51]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1262,8 +1262,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[52]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1275,8 +1275,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[53]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1288,8 +1288,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[54]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1301,8 +1301,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[55]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1314,8 +1314,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[56]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1327,8 +1327,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[57]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1340,8 +1340,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[58]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1353,8 +1353,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[59]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1366,8 +1366,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[60]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1379,8 +1379,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[61]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1392,8 +1392,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[62]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1405,8 +1405,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[63]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1418,8 +1418,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[64]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1431,8 +1431,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[65]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1444,8 +1444,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[66]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1457,8 +1457,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[67]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1470,8 +1470,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[68]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1483,8 +1483,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[69]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1496,8 +1496,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[70]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1509,8 +1509,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[71]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1522,8 +1522,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[72]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1535,8 +1535,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[73]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1548,8 +1548,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[74]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1561,8 +1561,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[75]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1574,8 +1574,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[76]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1587,8 +1587,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[77]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1600,8 +1600,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[78]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1613,8 +1613,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[79]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1626,8 +1626,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[80]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1639,8 +1639,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[81]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1652,8 +1652,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[82]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1665,8 +1665,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[83]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1678,8 +1678,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[84]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1691,8 +1691,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[85]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1704,8 +1704,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[86]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1717,8 +1717,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[87]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1730,8 +1730,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[88]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1743,8 +1743,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[89]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1756,8 +1756,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[90]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1769,8 +1769,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[91]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1782,8 +1782,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[92]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1795,8 +1795,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[93]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1808,8 +1808,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[94]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1821,8 +1821,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[95]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1834,8 +1834,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[96]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1847,8 +1847,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[97]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1860,8 +1860,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[98]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1873,8 +1873,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[99]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1886,8 +1886,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[100]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1899,8 +1899,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[101]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1912,8 +1912,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[102]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1925,8 +1925,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[103]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1938,8 +1938,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[104]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1951,8 +1951,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[105]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1964,8 +1964,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[106]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1977,8 +1977,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[107]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -1990,8 +1990,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[108]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -2003,8 +2003,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[109]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -2016,8 +2016,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[110]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -2029,8 +2029,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[111]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -2042,8 +2042,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[112]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -2055,8 +2055,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[113]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -2068,8 +2068,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[114]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -2081,8 +2081,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[115]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -2094,8 +2094,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[116]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -2107,8 +2107,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[117]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -2120,8 +2120,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[118]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -2133,8 +2133,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[119]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -2146,8 +2146,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[120]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -2159,8 +2159,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[121]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -2172,8 +2172,8 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].apic[122]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
@@ -2185,16 +2185,16 @@ m_NaTs2_t = 0.005963
 h_NaTs2_t = 0.697059
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].axon[0]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
 ko0_k_ion = 2.500000
 cai0_ca_ion = 0.000050
 cao0_ca_ion = 2.000000
-ica = -11.656875
-dica_dv_ = 0.056802
+ica = -0.000020
+dica_dv_ = 0.000000
 m_Ca_HVA = 0.000182
 h_Ca_HVA = 0.580751
 m_Ca_LVAst = 0.015267
@@ -2211,16 +2211,16 @@ zTau_SK_E2 = 1.000000
 z_SK_E2 = 0.000033
 m_SKv3_1 = 0.000179
 #cADpyr232_L5_TTPC1_0fb1ca4724[0].axon[1]
-g_pas = 12300.000000
-e_pas = 12301.000000
+g_pas = 0.000004
+e_pas = -72.000000
 nai0_na_ion = 10.000000
 nao0_na_ion = 140.000000
 ki0_k_ion = 54.400000
 ko0_k_ion = 2.500000
 cai0_ca_ion = 0.000050
 cao0_ca_ion = 2.000000
-ica = -11.656875
-dica_dv_ = 0.056802
+ica = -0.000020
+dica_dv_ = 0.000000
 m_Ca_HVA = 0.000182
 h_Ca_HVA = 0.580751
 m_Ca_LVAst = 0.015267
