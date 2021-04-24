@@ -70,11 +70,4 @@ custom_score_functions = [
                     'KL_divergence']
 
 
-# model = "bbp"
-# peeling ="potassium"
-# peeling = "potassium"
-# date = "02_04_2021"
-# objectives_file = h5py.File('../../objectives/multi_stim_without_sensitivity_bbp_' + peeling + "_" + date + '_stims.hdf5', 'r')
-# opt_weight_list = objectives_file['opt_weight_list'][:]
-# opt_stim_name_list = objectives_file['opt_stim_name_list'][:]
-# score_function_ordered_list = objectives_file['ordered_score_function_list'][:]
+orig_params = [0.0000022060, -66.5600000000, 4.0383444556,3.1263250613,0.0047147854,2.8515288117, 5.1781678079, 0.1096452854,0.0005345695, 0.1578655731,0.0016590198, 3.7929209114, 0.0036489355,0.0002609501]

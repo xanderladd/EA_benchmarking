@@ -150,3 +150,9 @@ def print_best_volts():
 all_volts = get_hof()
 #efels = get_efels(all_volts)
 #print_best_volts()
+
+"""
+Add a plot that shows where bounds are for each parameter
+
+
+"""

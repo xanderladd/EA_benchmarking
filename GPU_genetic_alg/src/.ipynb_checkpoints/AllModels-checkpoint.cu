@@ -11,7 +11,7 @@
 #define R (8.31441f)
 #define FARADAY (96485.309f)
 #define ktf (1000.*8.3134*(celsius + 273.15)/FARADAY)
-#define DEF_vrest	-65.
+#define DEF_vrest	-72.
 #define DEF_nai 10.
 #define DEF_nao 140.
 #define DEF_ena (115. + DEF_vrest)

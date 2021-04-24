@@ -21,6 +21,11 @@ def noSpikePen(volts, targetVolts):
         return 800
     else:
         return 0
+    
+    
+# def noSpikePen(volts, targetVolts):
+#     return np.count_nonzero(np.where(volts < -52)[0])
+   
 
 def SpikePen(volts, targetVolts):
     if np.max(targetVolts) < 0 and  np.max(volts) > 0:
@@ -104,7 +109,8 @@ def check_ap_at_zero(stim_ind, volts, opt_stim_name_list, stim_file):
                 if True in APs:
                     #return 400 # threshold parameter that I am still tuning
                     #print("indv:",i, "stim ind: ", stim_ind)
-                    checks[i] = 400
+                    #TODO: try 200
+                    checks[i] = 0
     return checks      
 
 
@@ -165,9 +171,9 @@ def convert_allen_data(opt_stim_name_list, stim_file, dts):
     for i in range(len(opt_stim_name_list)):
         old_stim = "../Data/Stim_raw{}.csv".format(i)
         old_time = "../Data/times{}.csv".format(i)
-        if os.path.exists(old_stim) :
-            os.remove(old_stim)
-            os.remove(old_time)
+#         if os.path.isfile(old_stim) :
+#             os.remove(old_stim)
+#             os.remove(old_time)
     for i in range(len(opt_stim_name_list)):
         # remove this somehow
         if len(opt_stim_name_list[i].decode('ascii')) > 8:
