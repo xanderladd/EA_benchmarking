@@ -104,7 +104,7 @@ def check_ap_at_zero(stim_ind, volts, opt_stim_name_list, stim_file):
                 if True in APs:
                     #return 400 # threshold parameter that I am still tuning
                     #print("indv:",i, "stim ind: ", stim_ind)
-                    checks[i] = 400
+                    checks[i] = 0
     return checks      
 
 
