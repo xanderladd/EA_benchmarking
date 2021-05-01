@@ -116,7 +116,6 @@ void RunByModelSerial(int argc ) {
 
   MYDTYPE CompDepth,CompFDepth;
   //ReadSerialNeuronData(BasicConst_FN, TheMMat);//Since the serial is just for debugging no real reason not to have just the parallel
-
   ReadParallelNeuronData(BasicConstP_FN, TheMMat,&CompDepth,&CompFDepth);
 
   Init();
@@ -335,14 +334,15 @@ void RunByModelSerial(int argc ) {
 void InitP(){ // YYY add void
 }
 
-void ReadParallelNeuronData(const char* FN, HMat &TheMat,MYDTYPE *CompDepth,MYDTYPE *CompFDepth) {
+void ReadParallelNeuronData(const char* FN, HMat &TheMat,MYDTYPE *CompDepth,MYDTYPE *CompFDepth, int global_rank) {
   char FileName[300];
   //char cwd[3000];
   double* tmpe,*tmpf;
   //getcwd(cwd, sizeof(cwd));
   //printf("working dir is %s\n",cwd);
 
-  sprintf(FileName,"%sSegP.csv",FN);
+  //sprintf(FileName,"%sSegP%i.csv",FN,global_rank );
+  sprintf(FileName,"%sSegP.csv",FN );
   //sprintf(FileName,"%s%dSegP.mat",FN,64);
   //printf("Start reading file - ReadSerialNeuronData() %s\n",FileName);
   FILE *fl;
@@ -374,10 +374,13 @@ void ReadParallelNeuronData(const char* FN, HMat &TheMat,MYDTYPE *CompDepth,MYDT
   char line[409600];
   fgets(line, sizeof(line), fl);
   ReadShortFromCSV(line, &TheMat.N, 1);//line 0
+
   //printf("printing line %s\n",line);
   fgets(line, sizeof(line), fl);;//line 1
   ReadShortFromCSV(line, &TheMat.NComps, 1);
+
   fgets(line, sizeof(line), fl);;//line 2
+
   tmpe = (double*) malloc(TheMat.N*sizeof(double));
   tmpf = (double*) malloc(TheMat.N*sizeof(double));
   //TheMat.e = (MYSECONDFTYPE*) malloc(TheMat.N*sizeof(MYSECONDFTYPE));
@@ -387,11 +390,14 @@ void ReadParallelNeuronData(const char* FN, HMat &TheMat,MYDTYPE *CompDepth,MYDT
   ReadDoubleFromCSV(line, tmpe, TheMat.N);
   TheMat.e = tmpe;
   fgets(line, sizeof(line), fl);;//line 3
+
+
   ReadDoubleFromCSV(line, tmpf, TheMat.N);
   TheMat.f = tmpf;
   fgets(line, sizeof(line), fl);;//line 4
   //printf("*1 assigning line 4\n");
   //printf(line);
+
   /*for(int i =0;i<TheMat.N;i++){
     TheMat.e[i] = tmpe[i+1];
     TheMat.f[i] = tmpf[i];
@@ -410,10 +416,19 @@ void ReadParallelNeuronData(const char* FN, HMat &TheMat,MYDTYPE *CompDepth,MYDT
   MYDTYPE* tmpsegtocomp = (MYDTYPE*) malloc(TheMat.N*sizeof(MYDTYPE));
   ReadShortFromCSV(line, tmpsegtocomp, TheMat.N);
   TheMat.SegToComp = tmpsegtocomp;
+  
+  //fgets(line, sizeof(line), fl);//line 6
+  //short MyNSets;
+  //ReadShortFromCSV(line, &MyNSets, 1);
+  //ReadShortFromCSV(line, &TheMat.NSets, 1);//line 0
+  //printf("\n TheMat.NSets is : %i \n", TheMat.NSets);
+
   fgets(line, sizeof(line), fl);//line 6
-  MYFTYPE* tmpcms = (MYFTYPE*) malloc(TheMat.N*sizeof(MYFTYPE));
-  ReadFloatFromCSV(line, tmpcms, TheMat.N);
+  MYFTYPE* tmpcms = (MYFTYPE*) malloc(TheMat.N*sizeof(MYFTYPE)); //TheMat.NSets*
+  ReadFloatFromCSV(line, tmpcms, TheMat.N); //TheMat.NSets*
   TheMat.Cms = tmpcms;
+  printf("\n LENGTH OF CMS: %i \n", sizeof(TheMat.Cms));
+  
   fgets(line, sizeof(line), fl);;//line 7
   ReadShortFromCSV(line, &TheMat.NModels, 1);
   fgets(line, sizeof(line), fl);;//line 8
@@ -608,12 +623,15 @@ void RunByModelP(int argc, int stim_ind, int globalRank) { // YYY add void
     printf("%s \nLength: %d\n", buffer, strnlen(buffer,5000));
     free(buffer);
   }
+    ReadParallelNeuronData(BasicConstP_FN, TheMMat,&CompDepth,&CompFDepth,globalRank);
+
 //  printf("starting to read");
-  ReadParallelNeuronData(BasicConstP_FN, TheMMat,&CompDepth,&CompFDepth);
 //  printf("done reding\n****\n");
     int* p2pCapableGPUs;
     int np2p;
   Init(argc, stim_ind, globalRank);
+  
+
     printf("reading file %s\n", BasicConstP_FN);
     if(argc<=1){
         
