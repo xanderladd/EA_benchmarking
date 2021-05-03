@@ -212,7 +212,7 @@ void ReadFloatWithEFromCSV(char* line, MYFTYPE *ans, int n) {
 }
 
 
-MYFTYPE* ReadAllParams(const char* FN, MYDTYPE NParams, MYDTYPE Nx, int  &nSets) {
+MYFTYPE* ReadAllParams(const char* FN, MYDTYPE NParams, MYFTYPE* &cm_input, MYDTYPE Nx, int  &nSets) {
     MYFTYPE* ans;
     //printf("readingggg params %s\n",FN);
     FILE *fl = fopen(FN, "r"); // YYY add FILE*
@@ -224,6 +224,7 @@ MYFTYPE* ReadAllParams(const char* FN, MYDTYPE NParams, MYDTYPE Nx, int  &nSets)
     fgets(line, sizeof(line), fl);
     ReadIntFromCSV(line, &nSets, 1);
     //printf("reading params nsets is %d\n",nSets);
+
     ans = (MYFTYPE *)malloc(Nx * NParams * nSets * sizeof(MYFTYPE));
     //printf("Nx %d nparams %d,nSets%d\n",Nx,NParams,nSets);
     //printf("malloc size is %d\n",Nx*NParams*nSets*sizeof(MYFTYPE));
@@ -233,7 +234,13 @@ MYFTYPE* ReadAllParams(const char* FN, MYDTYPE NParams, MYDTYPE Nx, int  &nSets)
         ReadFloatWithEFromCSV(line, &ans[i*Nx*NParams], Nx*NParams);
         //printf("\n");
     }
-    //printf("done filling params");
+    fgets(line, sizeof(line), fl);
+    cm_input = (MYFTYPE *)malloc( nSets * sizeof(MYFTYPE));
+
+    // cms need to go at the end of ans array, make sure end of ans is cms
+    ReadFloatWithEFromCSV(line, cm_input,  nSets * sizeof(MYFTYPE));
+    //printf("\n cCm is len  %i \n", sizeof(cm_input));
+    //printf("\n %f \n\n",cm_input[3]);
     fclose(fl);
     return ans;
 }

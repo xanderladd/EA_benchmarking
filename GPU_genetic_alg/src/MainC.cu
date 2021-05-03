@@ -27,6 +27,8 @@ char debugFN[]="Debug.dat";
 FILE *fdebug,*fdebug2,*fdebug3;
 MYFTYPE **ParamsMSerial;
 MYFTYPE *ParamsM;
+MYFTYPE *cm_input;
+
 MYFTYPE *InitStatesM;
 int NSets;
 MYDTYPE FParams;
@@ -71,7 +73,10 @@ void Init(int argc, int stim_ind, int globalRank){
   char AllParams_F[300];
   sprintf(AllParams_F, "../Data/AllParams%d.csv",globalRank);
   printf("looking for %s", AllParams_F);
-  ParamsM = ReadAllParams(AllParams_F,NPARAMS, TheMMat.NComps,NSets);
+  ParamsM = ReadAllParams(AllParams_F,NPARAMS, cm_input, TheMMat.NComps,NSets);
+  //printf(" \n\n main cm input %f \n\n", cm_input[3]);
+
+  
 #ifdef NKIN_STATES
   printf("before readinitstates");
   InitStatesM = ReadInitStates(InitStates_FN, NSTATES, TheMMat.NComps, NSets);
@@ -417,17 +422,12 @@ void ReadParallelNeuronData(const char* FN, HMat &TheMat,MYDTYPE *CompDepth,MYDT
   ReadShortFromCSV(line, tmpsegtocomp, TheMat.N);
   TheMat.SegToComp = tmpsegtocomp;
   
-  //fgets(line, sizeof(line), fl);//line 6
-  //short MyNSets;
-  //ReadShortFromCSV(line, &MyNSets, 1);
-  //ReadShortFromCSV(line, &TheMat.NSets, 1);//line 0
-  //printf("\n TheMat.NSets is : %i \n", TheMat.NSets);
 
   fgets(line, sizeof(line), fl);//line 6
-  MYFTYPE* tmpcms = (MYFTYPE*) malloc(TheMat.N*sizeof(MYFTYPE)); //TheMat.NSets*
-  ReadFloatFromCSV(line, tmpcms, TheMat.N); //TheMat.NSets*
+  MYFTYPE* tmpcms = (MYFTYPE*) malloc(TheMat.N*sizeof(MYFTYPE));
+  ReadFloatFromCSV(line, tmpcms, TheMat.N); 
   TheMat.Cms = tmpcms;
-  printf("\n LENGTH OF CMS: %i \n", sizeof(TheMat.Cms));
+  //printf("\n LENGTH OF CMS: %i \n", sizeof(TheMat.Cms));
   
   fgets(line, sizeof(line), fl);;//line 7
   ReadShortFromCSV(line, &TheMat.NModels, 1);
@@ -642,7 +642,8 @@ void RunByModelP(int argc, int stim_ind, int globalRank) { // YYY add void
     p2pCapableGPUs = {&curr_dev};
     np2p = 0;
     }
-  stEfork2Main(stim,sim, ParamsM,InitStatesM, TheMMat, V,CompDepth,CompFDepth,NSets, p2pCapableGPUs,np2p,  stim_ind, globalRank);
+
+  stEfork2Main(stim,sim, ParamsM, cm_input, InitStatesM, TheMMat, V,CompDepth,CompFDepth,NSets, p2pCapableGPUs,np2p,  stim_ind, globalRank);
 
 }
 void freeRunByModelP() {

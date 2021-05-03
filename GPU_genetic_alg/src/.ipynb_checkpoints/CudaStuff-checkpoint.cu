@@ -6,7 +6,7 @@
 using std::endl;
 using std::cout;
 
-__constant__ MYFTYPE cCm[NSEG];
+//__constant__ MYFTYPE cCm[NSEG];
 __constant__ MYSECONDFTYPE cE[NSEG];
 __constant__ MYSECONDFTYPE cF[NSEG];
 __constant__ MYDTYPE cFIdxs[NSEG*LOG_N_DEPTH];
@@ -143,7 +143,7 @@ __device__ void BkSub(HMat InMat, MYSECONDFTYPE* uHP, MYSECONDFTYPE* bHP, MYSECO
 }
 #endif
 
-__device__ void runSimulation(HMat InMat, const MYFTYPE* __restrict__ ParamsM, MYFTYPE* ModelStates, MYFTYPE* V, Stim stim, Sim sim, MYFTYPE* VHotGlobal)
+__device__ void runSimulation(HMat InMat, const MYFTYPE* __restrict__ ParamsM,  MYFTYPE* cCm, MYFTYPE* cm_input, MYFTYPE* ModelStates, MYFTYPE* V, Stim stim, Sim sim, MYFTYPE* VHotGlobal)
 {
 
   __shared__ MYSECONDFTYPE uHP_all[(NSEG + 2)*NTRACES];
@@ -156,15 +156,22 @@ __device__ void runSimulation(HMat InMat, const MYFTYPE* __restrict__ ParamsM, M
 
   //MYDTYPE PerStimulus;
   //PerStimulus = InMat.N+2;
-
+  
 
 
   MYDTYPE NeuronID = blockIdx.x;
+  //initializng cCm from cm_input
+  MYFTYPE float_cm = cm_input[NeuronID];
+  //printf("float cm is %f", float_cm);
+  
+
+
   int Nt = stim.Nt;
   MYFTYPE t = 0;
   MYSECONDFTYPE *PX, *PF;
   PX = bHP;
   PF = uHP;
+
   MYDTYPE PIdx[NILP + 1];
   for (int count = 1; count < NILP + 1; count++) {
     PIdx[count] = threadIdx.x + (WARPSIZE*(count - 1));
@@ -188,6 +195,14 @@ __device__ void runSimulation(HMat InMat, const MYFTYPE* __restrict__ ParamsM, M
   MYFTYPE eca[NILP + 1];
   MYFTYPE StimCurrent[NILP + 1];
   for (int count = 1; count < NILP + 1; count++) {
+	  //initialize cCm
+	  if (cCm[PIdx[count]] == 2.000000000) {
+		  cCm[PIdx[count]] = float_cm;
+          //if (NeuronID == 2) {
+           //   printf("\n ID: %i ... NEW CCM : %f", NeuronID, cCm[PIdx[count]]);
+             // printf("\n should be %f", cm_input[NeuronID]);
+         // }
+	}
     v[count] = V[PIdx[count]];
     sumCurrents[count] = 0;
     sumCurrentsDv[count] = 0;
@@ -337,12 +352,12 @@ for (int count = 1; count < NILP + 1; count++) {
     VHotGlobal[NeuronID*(sim.NRecSites*Nt*blockDim.y) + threadIdx.y*Nt*sim.NRecSites + recInd*Nt + Nt - WARPSIZE + PIdx[1]] = SMemVHot[WARPSIZE*recInd + PIdx[1]];
   }
 }
-__global__ void NeuroGPUKernel(Stim stim, MYFTYPE* ParamsM, MYFTYPE* ModelStates, Sim sim, HMat InMat, MYFTYPE *V, MYFTYPE* VHotGlobal, MYDTYPE CompDepth, MYDTYPE CompFDepth)
+__global__ void NeuroGPUKernel(Stim stim, MYFTYPE* ParamsM, MYFTYPE* cCm, MYFTYPE* cm_input, MYFTYPE* ModelStates, Sim sim, HMat InMat, MYFTYPE *V, MYFTYPE* VHotGlobal, MYDTYPE CompDepth, MYDTYPE CompFDepth)
 {
 
   MYFTYPE *amps, *SMemVHot;
   MYDTYPE offset = 0;
-  runSimulation(InMat, ParamsM, ModelStates, V, stim, sim, VHotGlobal);
+  runSimulation(InMat, ParamsM, cCm,cm_input, ModelStates, V, stim, sim, VHotGlobal);
 }
 void ReadParamsMatX(const char* FN, MYFTYPE* ParamsM, MYDTYPE NParams, MYDTYPE Nx) {
   char FileName[300];
@@ -385,6 +400,7 @@ void initFrameWork(Stim stim, Sim sim, MYFTYPE* ParamsM, MYFTYPE* InitStatesM, H
   Mat_d.NComps = InMat.NComps;
   Mat_d.Depth = InMat.Depth;
   Mat_d.NModels = InMat.NModels;
+
   Mat_d.LognDepth = InMat.LognDepth;
   Mat_d.nFathers = InMat.nFathers;
   Mat_d.nCallForFather = InMat.nCallForFather;
@@ -402,7 +418,7 @@ void initFrameWork(Stim stim, Sim sim, MYFTYPE* ParamsM, MYFTYPE* InitStatesM, H
   CUDA_RT_CALL(cudaMemcpyToSymbol(cKs, InMat.Ks, InMat.N * sizeof(MYDTYPE)));
   CUDA_RT_CALL(cudaMemcpyToSymbol(cSegToComp, InMat.SegToComp, InMat.N * sizeof(MYDTYPE)));
   CUDA_RT_CALL(cudaMemcpyToSymbol(cBoolModel, InMat.boolModel, InMat.N * InMat.NModels * sizeof(MYDTYPE)));
-  CUDA_RT_CALL(cudaMemcpyToSymbol(cCm, InMat.Cms, InMat.N * sizeof(MYFTYPE)));
+
   CUDA_RT_CALL(cudaMemcpyToSymbol(cSonNoVec, InMat.SonNoVec, InMat.N * sizeof(MYDTYPE)));
   CUDA_RT_CALL(cudaMemcpyToSymbol(cRelStarts, InMat.RelStarts, InMat.nFathers * sizeof(MYDTYPE)));
   CUDA_RT_CALL(cudaMemcpyToSymbol(cRelEnds, InMat.RelEnds, InMat.nFathers * sizeof(MYDTYPE)));
@@ -436,6 +452,9 @@ void initFrameWork(Stim stim, Sim sim, MYFTYPE* ParamsM, MYFTYPE* InitStatesM, H
   CUDA_RT_CALL(cudaMemcpyToSymbol(cFLRelEnds, InMat.FLRelEnds, InMat.nFLRel * sizeof(MYDTYPE)));
   CUDA_RT_CALL(cudaMalloc((void**)&PXOut_d, (InMat.N + 1) * sizeof(MYSECONDFTYPE)));
   CUDA_RT_CALL(cudaMalloc((void**)&PFOut_d, (InMat.N + 1) * sizeof(MYSECONDFTYPE)));
+  
+  CUDA_RT_CALL(cudaMemcpyToSymbol(cFLRelStarts, InMat.FLRelStarts, InMat.nFLRel * sizeof(MYDTYPE)));
+
   CUDA_RT_CALL(cudaThreadSynchronize());
   printf("done with all init framework\n");
 }
@@ -444,10 +463,13 @@ void initFrameWork(Stim stim, Sim sim, MYFTYPE* ParamsM, MYFTYPE* InitStatesM, H
 
 
 
-void callKernel(Stim stim, Sim sim, MYFTYPE* ParamsM, MYFTYPE* InitStatesM, HMat& Mat_d, MYFTYPE* V, MYDTYPE CompDepth, MYDTYPE CompFDepth, MYDTYPE prevRuns, MYDTYPE currKernelRun, MYFTYPE* VHotsHost) {
+void callKernel(Stim stim, Sim sim, MYFTYPE* ParamsM, MYFTYPE* cm_input, MYFTYPE* InitStatesM, HMat& Mat_d, MYFTYPE* V, MYDTYPE CompDepth, MYDTYPE CompFDepth, MYDTYPE NSets,  MYDTYPE prevRuns, MYDTYPE currKernelRun, MYFTYPE* VHotsHost) {
   MYDTYPE Nt = stim.Nt;
   MYFTYPE *d_modelParams, *d_modelStates;
   MYFTYPE *VHotsGlobal;
+  MYFTYPE *d_cCm;
+  MYFTYPE *d_cm_input;
+
   MYFTYPE *V_d;
   CUDA_RT_CALL(cudaMalloc((void**)&VHotsGlobal, currKernelRun*sim.NRecSites*Nt *stim.NStimuli * sizeof(MYFTYPE)));
     int memSizeForVHotGlobal = Nt*stim.NStimuli*sim.NRecSites;
@@ -488,7 +510,17 @@ void callKernel(Stim stim, Sim sim, MYFTYPE* ParamsM, MYFTYPE* InitStatesM, HMat
 #endif    
   CUDA_RT_CALL(cudaMalloc((void**)&d_modelParams, NPARAMS * Mat_d.NComps *currKernelRun * sizeof(MYFTYPE)));
   CUDA_RT_CALL(cudaMemcpy(d_modelParams, &ParamsM[prevRuns*memSizeForModelParams], NPARAMS * Mat_d.NComps * currKernelRun * sizeof(MYFTYPE), cudaMemcpyHostToDevice));
-    cout << "point B" << endl;
+    
+  //this would be the cm that has the default values (with zero in the right places)
+  CUDA_RT_CALL(cudaMalloc((void**)&d_cCm, (NSEG) * sizeof(MYFTYPE)));
+  CUDA_RT_CALL(cudaMemcpy(d_cCm, Mat_d.Cms, Mat_d.N * sizeof(MYFTYPE), cudaMemcpyHostToDevice));
+
+
+  //This is where are all the cm values per model (block)
+  CUDA_RT_CALL(cudaMalloc((void**)&d_cm_input, (NSets) * sizeof(MYFTYPE)));
+  //printf("%i alloc is", NSets * sizeof(MYFTYPE));
+  printf(" \n\n cm input %f \n\n",cm_input[3]);
+  CUDA_RT_CALL(cudaMemcpy(d_cm_input, cm_input, NSets * sizeof(MYFTYPE) ,cudaMemcpyHostToDevice));
 
   CUDA_RT_CALL(cudaMalloc((void**)&d_modelStates, (NSTATES + 1) * (NSEG) * currKernelRun * sizeof(MYFTYPE)));
   dim3 blockDim(WARPSIZE, stim.NStimuli);
@@ -506,13 +538,13 @@ void callKernel(Stim stim, Sim sim, MYFTYPE* ParamsM, MYFTYPE* InitStatesM, HMat
 #endif
 //#ifndef NKIN_STATES
   printf("kernel not ran yet\n");
-  NeuroGPUKernel << <currKernelRun, blockDim >> >(stim_d, d_modelParams, d_modelStates, sim_d, Mat_d, V_d, VHotsGlobal, CompDepth, CompFDepth); // RRR
+  NeuroGPUKernel << <currKernelRun, blockDim >> >(stim_d, d_modelParams, d_cCm, d_cm_input, d_modelStates, sim_d, Mat_d, V_d, VHotsGlobal, CompDepth, CompFDepth); // RRR
   printf("kernel ran before memcpyasync currkernel run is %d\n", currKernelRun);
   CUDA_RT_CALL(cudaMemcpyAsync(VHotsHost, VHotsGlobal, currKernelRun * Nt * sim.NRecSites * stim.NStimuli * sizeof(MYFTYPE), cudaMemcpyDeviceToHost));
   printf("done copying*&*&*&*&*&*&*\n");
 }
 
-void stEfork2Main(Stim stim, Sim sim, MYFTYPE* ParamsM, MYFTYPE* InitStatesM, HMat& InMat, MYFTYPE* V, MYDTYPE CompDepth, MYDTYPE CompFDepth, int NSets, int* p2pCapableGPUs, int np2p, int stim_ind, int globalRank) {
+void stEfork2Main(Stim stim, Sim sim, MYFTYPE* ParamsM, MYFTYPE* cm_input, MYFTYPE* InitStatesM, HMat& InMat, MYFTYPE* V, MYDTYPE CompDepth, MYDTYPE CompFDepth, int NSets, int* p2pCapableGPUs, int np2p, int stim_ind, int globalRank) {
   MYFTYPE *Vhots;
   MYFTYPE **vhots_dev;
   MYDTYPE Nt = stim.Nt;
@@ -541,14 +573,16 @@ void stEfork2Main(Stim stim, Sim sim, MYFTYPE* ParamsM, MYFTYPE* InitStatesM, HM
   cudaEventCreate(&start);
   cudaEventCreate(&stop);
   cudaEventRecord(start);
+  
+  // xander add this since matd does not have value for cms
+  Mat_d.Cms = InMat.Cms;
 
   for (int i = 0; i < np2p; i++) {
     if (prevRuns >= NSets)  break;
     CUDA_RT_CALL(cudaSetDevice(p2pCapableGPUs[i]));
     printf("calling kernel dev%d\n", p2pCapableGPUs[i]);
-        cout << "point A" << endl;
     cudaMallocHost((void**)&vhots_dev[i], stim.NStimuli*Nt*sim.NRecSites*currRun * sizeof(MYFTYPE));
-    callKernel(stim, sim, ParamsM, InitStatesM, Mat_d, V, CompDepth, CompFDepth, prevRuns, currRun, vhots_dev[i]);
+    callKernel(stim, sim, ParamsM, cm_input, InitStatesM, Mat_d, V, CompDepth, CompFDepth, NSets, prevRuns, currRun, vhots_dev[i]);
         prevRuns += currRun;
 
   }
@@ -588,9 +622,3 @@ void stEfork2Main(Stim stim, Sim sim, MYFTYPE* ParamsM, MYFTYPE* InitStatesM, HM
       //sprintf(FileName, "/tmp/Data/VHotP%d.dat",curr_dev);
       SaveArrayToFile(FileName, NSets*Nt*stim.NStimuli*sim.NRecSites, Vhots);
 }
-
-    
-
-
-
-

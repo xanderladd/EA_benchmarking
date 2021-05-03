@@ -75,6 +75,8 @@ typedef struct {
 	MYSECONDFTYPE *e;
 	MYSECONDFTYPE *f;
 	MYDTYPE N;
+    MYDTYPE NSets;
+
 	// MYDTYPE NSegs;
 	MYDTYPE *Ks;
 	MYFTYPE *Cms;
@@ -158,7 +160,7 @@ double diffclock(clock_t clock1,clock_t clock2);
 //void stEfork2Init(Stim stim, const HHparams& InHHParams, HMat& InMat, MYDTYPE &Nt, MYFTYPE&dt, MYDTYPE &N, MYFTYPE *&Iapp, MYFTYPE &stimArea, MYFTYPE &Cm, MYFTYPE **&VHots, MYFTYPE *&V, MYFTYPE *&n, MYFTYPE *&m, MYFTYPE *&h, MYFTYPE *&dOrig, MYFTYPE *&d);
 #endif
 void ReadSerialNeuronData(const char* FN, HMat &TheMat);
-void ReadParallelNeuronData(const char* FN, HMat &TheMat,MYDTYPE* CompDepth,MYDTYPE* CompFDepth);
+void ReadParallelNeuronData(const char* FN, HMat &TheMat,MYDTYPE* CompDepth,MYDTYPE* CompFDepth, int NSets, int global_rank);
 void FreeSerialNeuronData(HMat &InMat);
 void ReadStimData(const char* FN, Stim &stim,MYDTYPE Nx);
 void CreateStimData(Stim &stim);
@@ -183,7 +185,8 @@ void debugPrintMYSECONDFTYPE(MYSECONDFTYPE* A,MYDTYPE N,FILE* fdebug);
 void ReadShortFromCSV(char* line, MYDTYPE *ans, int n);
 void ReadDoubleFromCSV(char* line, double *ans, int n);
 void ReadFloatFromCSV(char* line, MYFTYPE *ans, int n);
-MYFTYPE* ReadAllParams(const char* FN, MYDTYPE NParams, MYDTYPE Nx, int  &ntemp);
+
+MYFTYPE* ReadAllParams(const char* FN, MYDTYPE NParams, MYFTYPE* &cCm, MYDTYPE Nx, int  &ntemp);
 MYFTYPE* ReadInitStates(const char* FN, MYDTYPE NSTATES, MYDTYPE Nx, MYDTYPE  Nsets);
 int* checkPeerAccess(int &np2p);
 void enablePeerAccess(int* p2pCapableGPUs,int np2p);
