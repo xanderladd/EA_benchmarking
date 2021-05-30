@@ -15,9 +15,33 @@ import h5py
 # need to be passed in to do this.
 import sys
 #from concurrent.futures import ProcessPoolExecutor as Pool
-from multiprocessing import Pool
+# import tracemalloc
+# tracemalloc.start()
+# ... start your applic
+# from joblib import Parallel, delayed
+# import pprint
 from mpi4py import MPI
-import myGlobals
+import cProfile
+comm = MPI.COMM_WORLD
+global_rank = comm.Get_rank()
+size = comm.Get_size()
+
+#from concurrent.futures import ThreadPoolExecutor as Pool#
+#multiprocessing.set_start_method('fork')
+
+# os.environ["OPENBLAS_NUM_THREADS"] = "1" 
+# os.environ["MKL_NUM_THREADS"] = "1" 
+# os.environ["NUMEXPR_NUM_THREADS"] ="1"
+
+# import multiprocessing as mp
+# from multiprocessing import Pool
+
+#multiprocessing.set_start_method('fork')
+
+#from torch.multiprocessing import Pool
+
+#from ray.util.multiprocessing import Pool
+
 # hack to remove eventually...imagine doing a getattr when you have the function
 # and can just do an eval :O
 thismodule = sys.modules[__name__]
@@ -28,16 +52,16 @@ traj_score_dict = {}
 threshold = -10
 
 #set environ
-comm = MPI.COMM_WORLD
-global_rank = comm.Get_rank()
-size = comm.Get_size()
+
 
 #if size == 1:
 #cpu_str = os.environ['SLURM_JOB_CPUS_PER_NODE']
 #SLURM_CPUS = int(re.search(r'\d+', cpu_str).group() )
 # else:
-#     SLURM_CPUS = int(os.environ['SLURM_JOB_CPUS_PER_NODE'][:1])
-nCpus =  44#multiprocessing.cpu_count()
+#     SLURM_CPUS = int(os.environ['SLURM_JOB_CPUS_PER_NODE'][:1])\
+pid=0
+affinity = os.sched_getaffinity(pid)
+nCpus = len(affinity)
 # These constants exist for efel features
 time_stamps =  10000
 starting_time_stamp = 1000
@@ -516,8 +540,9 @@ def eval_function(target, data, function, dt):
     """
     
     scorestart = timer.time()
-    if global_rank != 10:
-        logging.info("process {} is computing at {}".format(os.getpid(), scorestart))
+   
+
+    logging.info("process {} is computing at {}".format(os.getpid(), scorestart))
     num_indvs = data.shape[0]
     if function in custom_score_functions:
         score = [getattr(thismodule, function)(target, data[indv,:], dt) for indv in range(num_indvs)]
@@ -571,14 +596,17 @@ def eval_stim_sf_pair(args):
         #time = arg['start']
         start = arg["start"]
         curr_sf = arg["curr_sf"]
-        if global_rank != 10:
-            logging.info("process {} is {} and started at {}".format(os.getpid(), curr_sf, timer.time()))
+        curr_data_volt =arg["curr_data_volt"]
+        curr_target_volt =arg["curr_target_volt"]
+        #if global_rank != 10:
+        logging.info("process {} is {} and started at {}".format(os.getpid(), curr_sf, timer.time()))
         io_start = timer.time()
-        f =h5py.File("../Data/tmp/{}.hdf5".format(global_rank),"r")
-        curr_data_volt =f["data_volt{}{}".format(i,j)][:]
-        curr_target_volt =f["target_volt{}{}".format(i,j)][:]
+#         f =h5py.File("../Data/tmp/{}.hdf5".format(global_rank),"r")
+#         curr_data_volt =f["data_volt{}{}".format(i,j)][:]
+#         curr_target_volt =f["target_volt{}{}".format(i,j)][:]
         io_end = timer.time()
-        logging.info("IO:: " + str(io_end - io_start))
+        #logging.info("IO:: " + str(io_end - io_start))
+
 
         #time2 = timer.time()
         
@@ -591,35 +619,52 @@ def eval_stim_sf_pair(args):
             curr_scores = np.zeros(self.nindv)
 
         else:
+            strt = timer.time()
             curr_scores = eval_function(curr_target_volt, curr_data_volt, curr_sf, dt)
+            endd = timer.time()
+            #print(endd - strt, ": proc took", os.getpid(),  " was  :", curr_sf)
+
         norm_scores = normalize_scores(curr_scores, transformation)
-        for k in range(len(norm_scores)):
-            if np.isnan(norm_scores[k]):
-                norm_scores[k] = 1
-    #     if global_rank == 0:
-    #         print(norm_scores * curr_weight , i, j)
-        #print("making stuff took : ", time2-time," from  ", os.getpid(), "for ", curr_sf, " w/ weight", curr_weight)
+#         for k in range(len(norm_scores)):
+#             if np.isnan(norm_scores[k]):
+#                 norm_scores[k] = 1
+
         computation_time_end = timer.time()
-        if global_rank != 10:
-            logging.info("process {} returning at {}".format(os.getpid(), timer.time()))
+        logging.info("process {} returning at {}".format(os.getpid(), timer.time()))
         final_score += norm_scores * curr_weight 
-#    if global_rank ==0:
-#        print(final_score, i,j, "target score and an I and a J" )
-#     if global_rank ==3:
-#         print(final_score[0], i,j, "not target score and an I and a J" )    
-    
     return final_score
 
-def callPara(args):
+def wrap_para(arg):
+#     cProfile.runctx('eval_stim_sf_pair(arg)', globals(), locals(), 'profiles/prof%d.prof' % os.getpid())
+    datafn = 'profiles/prof%d.prof' % os.getpid()
+    prof = cProfile.Profile()
+    retval = prof.runcall(eval_stim_sf_pair, arg)
+    prof.dump_stats(datafn)
+    return retval
+
+    
+def callPara(p,args):
     # using either nCpus  or 20 
-    if global_rank == 0:
-        logging.info("************ launched PIDS at {} ************".format(timer.time()))
-    final_res = []
-    with Pool(nCpus) as p: # parallel mapping
-        res = p.map(eval_stim_sf_pair,args)
-            #final_res.append(res)
-    if global_rank == 0:
-        logging.info("************ finished PIDS at {} ************".format(timer.time()))
+    logging.info("************ launched PIDS at {} ************".format(timer.time()))
+    
+    # exit here to avoid bug
+    #exit()
+#     with Pool(35) as p:
+    start = timer.time()
+    res = p.map(wrap_para,args)
+    end = timer.time()
+
+
+#    res = map(eval_stim_sf_pair,args)
+#     print("ojIBIBIBIBPBPIBNIBIJNJI JNJNJINPINPINIJPN")
+#     with mp.Manager() as manager:
+#             d = manager.dict()
+#             with manager.Pool() as pool:
+#                 pool.map(f, repeat(d, 10))
+#             pprint.pprint(dict(d))
+#     Parallel(n_jobs=nCpus, max_nbytes='50K',mmap_mode='r', prefer='processes')(delayed(eval_stim_sf_pair)(arg) for arg in args)
+
+    logging.info("************ finished PIDS at {} ************".format(timer.time()))
     return res
 
 def eval_efel(feature_name, target, data, dt=0.02, stims=None, index=None):
@@ -645,13 +690,7 @@ def eval_efel(feature_name, target, data, dt=0.02, stims=None, index=None):
     curr_trace_target['stim_start'] = [stim_start]
     curr_trace_target['stim_end'] = [stim_end]
     traces = [curr_trace_target]
-    nan_inds_bol = np.isnan(data).any(axis=1)
-    nan_inds = [i for i, x in enumerate(nan_inds_bol) if x]
     #testing
-    if len(nan_inds) > 0:
-        print(nan_inds, "nan inds from ",global_rank )
-    data = np.delete(data,nan_inds,axis=1)
-    
     for i in range(len(data)):
         curr_trace_data = {}
         curr_trace_data['T'] = time
@@ -666,46 +705,11 @@ def eval_efel(feature_name, target, data, dt=0.02, stims=None, index=None):
         curr_trace_data['stim_end'] = [stim_end]
         traces.append(curr_trace_data)
     efelstart = timer.time()
-    traces_results = efel.getFeatureValues(traces, [feature_name], raise_warnings=False)
+    #with Pool(2) as p2:
+    traces_results = efel.getFeatureValues(traces, [feature_name], parallel_map=map, raise_warnings=False)
     #print("EFEL eval took: ", timer.time()-efelstart)
     diff_features = []
     for i in range(len(data)): #testing
         diff_features.append(diff_lists(traces_results[0][feature_name], traces_results[i+1][feature_name]))
     return diff_features
-
-
-#     allTraces = []
-#     chunksize = 5#len(data) // 10
-#     for chunk in range(0, len(data), chunksize):
-#         curr_traces = copy.deepcopy(traces)
-#         for i in range(chunk,chunk+chunksize):
-#             if i >= len(data):
-#                 break
-#             curr_trace_data = {}
-#             curr_trace_data['T'] = time
-#             curr_trace_data['V'] = data[i,:]
-#             assert len(data[i,:]) == 10000, "timesteps don't match with simulated data"
-#             curr_trace_data['stim_start'] = [stim_start]
-#             curr_trace_data['stim_end'] = [stim_end]
-#             curr_traces.append(curr_trace_data)
-#         allTraces.append(curr_traces)
-#     args = [(trace, [feature_name]) for trace in allTraces]
-  
-#     p = Pool2(max(1, nCpus - 20)) # using either nCpus - 20 or just 1 cuz we have used them all
-#     start = timer.time()
-
-#     map_res = p.starmap(efel.getFeatureValues, args)
-#     traces_results = [map_res[0][0]]
-#     for traces_result in map_res:
-#         for i in range(1,len(traces_result)):
-#             traces_results.append(traces_result[i])
-# #     traces_results = [traces_results[0][0]] + [traces_result[] for traces_result in traces_results]
-#     end = timer.time()
-#     print("process efel took: ", end -start, "for feature: ", feature_name)
-
-#     diff_features = []
-#     print(len(traces_results), len(data))
-#     for i in range(len(data)): #testing
-#         diff_features.append(diff_lists(traces_results[0][feature_name], traces_results[i+1][feature_name]))
-#     return np.array(diff_features)
 

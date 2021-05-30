@@ -1,0 +1,36 @@
+app 0: python optimize_parameters_genetic_alg.py --offspring_size 2030 --max_ngen 1
+cpu_index_using: logical
+overlapping_rs: allow
+oversubscribe_cpu: warn
+oversubscribe_gpu: error
+oversubscribe_mem: error
+rank: 0: { host: 1;  cpu: {0-167} ; gpu: {0,1,2,3,4,5} ; mem: 0-619325 } : app 0
+rank: 1: { host: 2;  cpu: {0-167} ; gpu: {0,1,2,3,4,5} ; mem: 0-619325 } : app 0
+rank: 2: { host: 3;  cpu: {0-167} ; gpu: {0,1,2,3,4,5} ; mem: 0-619325 } : app 0
+rank: 3: { host: 4;  cpu: {0-167} ; gpu: {0,1,2,3,4,5} ; mem: 0-619325 } : app 0
+rank: 4: { host: 5;  cpu: {0-167} ; gpu: {0,1,2,3,4,5} ; mem: 0-619325 } : app 0
+rank: 5: { host: 6;  cpu: {0-167} ; gpu: {0,1,2,3,4,5} ; mem: 0-619325 } : app 0
+rank: 6: { host: 7;  cpu: {0-167} ; gpu: {0,1,2,3,4,5} ; mem: 0-619325 } : app 0
+rank: 7: { host: 8;  cpu: {0-167} ; gpu: {0,1,2,3,4,5} ; mem: 0-619325 } : app 0
+rank: 8: { host: 9;  cpu: {0-167} ; gpu: {0,1,2,3,4,5} ; mem: 0-619325 } : app 0
+rank: 9: { host: 10;  cpu: {0-167} ; gpu: {0,1,2,3,4,5} ; mem: 0-619325 } : app 0
+rank: 10: { host: 11;  cpu: {0-167} ; gpu: {0,1,2,3,4,5} ; mem: 0-619325 } : app 0
+rank: 11: { host: 12;  cpu: {0-167} ; gpu: {0,1,2,3,4,5} ; mem: 0-619325 } : app 0
+rank: 12: { host: 13;  cpu: {0-167} ; gpu: {0,1,2,3,4,5} ; mem: 0-619325 } : app 0
+rank: 13: { host: 14;  cpu: {0-167} ; gpu: {0,1,2,3,4,5} ; mem: 0-619325 } : app 0
+rank: 14: { host: 15;  cpu: {0-167} ; gpu: {0,1,2,3,4,5} ; mem: 0-619325 } : app 0
+rank: 15: { host: 16;  cpu: {0-167} ; gpu: {0,1,2,3,4,5} ; mem: 0-619325 } : app 0
+rank: 16: { host: 17;  cpu: {0-167} ; gpu: {0,1,2,3,4,5} ; mem: 0-619325 } : app 0
+rank: 17: { host: 18;  cpu: {0-167} ; gpu: {0,1,2,3,4,5} ; mem: 0-619325 } : app 0
+rank: 18: { host: 19;  cpu: {0-167} ; gpu: {0,1,2,3,4,5} ; mem: 0-619325 } : app 0
+rank: 19: { host: 20;  cpu: {0-167} ; gpu: {0,1,2,3,4,5} ; mem: 0-619325 } : app 0
+rank: 20: { host: 21;  cpu: {0-167} ; gpu: {0,1,2,3,4,5} ; mem: 0-619325 } : app 0
+rank: 21: { host: 22;  cpu: {0-167} ; gpu: {0,1,2,3,4,5} ; mem: 0-619325 } : app 0
+rank: 22: { host: 23;  cpu: {0-167} ; gpu: {0,1,2,3,4,5} ; mem: 0-619325 } : app 0
+rank: 23: { host: 24;  cpu: {0-167} ; gpu: {0,1,2,3,4,5} ; mem: 0-619325 } : app 0
+rank: 24: { host: 25;  cpu: {0-167} ; gpu: {0,1,2,3,4,5} ; mem: 0-619325 } : app 0
+rank: 25: { host: 26;  cpu: {0-167} ; gpu: {0,1,2,3,4,5} ; mem: 0-619325 } : app 0
+rank: 26: { host: 27;  cpu: {0-167} ; gpu: {0,1,2,3,4,5} ; mem: 0-619325 } : app 0
+rank: 27: { host: 28;  cpu: {0-167} ; gpu: {0,1,2,3,4,5} ; mem: 0-619325 } : app 0
+rank: 28: { host: 29;  cpu: {0-167} ; gpu: {0,1,2,3,4,5} ; mem: 0-619325 } : app 0
+rank: 29: { host: 30;  cpu: {0-167} ; gpu: {0,1,2,3,4,5} ; mem: 0-619325 } : app 0

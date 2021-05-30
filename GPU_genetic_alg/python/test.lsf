@@ -1,0 +1,34 @@
+#!/bin/bash
+#BSUB -P nro106
+#BSUB -W 00:30
+#BSUB -nnodes 4
+#BSUB -q debug
+#####BSUB -q batch-hm
+#BSUB -alloc_flags gpumps
+#BSUB -J test
+#BSUB -o test2.%J
+#BSUB -e test2.%J
+
+source /gpfs/alpine/scratch/zladd/nro106/axonproj/miniconda3/bin/activate
+
+conda activate /gpfs/alpine/scratch/zladd/nro106/axonproj/miniconda3/envs/dot_env
+
+module load gcc/7.4.0 
+
+module load cuda/10.1.168 
+
+module load hdf5
+
+module load spectrum-mpi/10.3.1.2-20200121
+
+cd /gpfs/alpine/scratch/zladd/nro106/axonproj/benchmarking/GPU_genetic_alg/python
+export PAMI_PMIX_USE_OLD_MAPCACHE=1
+export OMPI_MCA_coll_ibm_xml_disable_cache=1
+date
+jsrun  -n 4 -g 6 -c 42 -a 1 --bind=rs -m 619326  python optimize_parameters_genetic_alg.py --offspring_size 800 --max_ngen 1
+#jsrun  -n 4 -g 6 -c 42 -a 1 --bind=rs  python optimize_parameters_genetic_alg.py  --max_ngen 1
+
+jsrun  -n 4 -g 6 -c 42 -a 1 --bind=rs -m 619326  python optimize_parameters_genetic_alg.py --offspring_size 400 --max_ngen 1
+#jsrun  -n 4 -g 6 -c 42 -a 1 --bind=rs  python optimize_parameters_genetic_alg.py --max_ngen 1
+#jsrun --erf_input dynamic_resource.txt
+#jsrun --erf_input test.erf

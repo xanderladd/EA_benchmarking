@@ -19,7 +19,6 @@ comm = MPI.COMM_WORLD
 global_rank = comm.Get_rank()
 size = os.environ['OMPI_COMM_WORLD_LOCAL_SIZE']#comm.Get_size()
 
-
 import logging.config
 logging.config.dictConfig({
     'version': 1,
@@ -128,7 +127,7 @@ def my_record_stats(stats, logbook, gen, population, invalid_count):
         pickle.dump(logbook, output)
         output.close()
 
-def main():
+def main(pool):
     args = get_parser().parse_args()
     algo._update_history_and_hof = my_update
     algo._record_stats = my_record_stats
@@ -138,7 +137,8 @@ def main():
                                 logging.DEBUG)[args.verbose],
                                 stream=sys.stdout)
     #opt = create_optimizer(args)
-    evaluator = hoc_ev.hoc_evaluator()
+    print(args.max_ngen, "MAX NGEN")
+    evaluator = hoc_ev.hoc_evaluator(pool)
     seed = os.getenv('BLUEPYOPT_SEED', args.seed)
     opt = bpop.optimisations.DEAPOptimisation(
         evaluator=evaluator,
@@ -172,5 +172,7 @@ def main():
         print ('History: ', hst, '\n')
         print ('Best individuals: ', best_indvs, '\n')
 if __name__ == '__main__':
-    main()
+    import multiprocessing as mp
+    pool = mp.Pool(160)
+    main(pool)
     logging.info("absolute end : " + str(time.time()))

@@ -220,6 +220,7 @@ else ifeq ($(TARGET_ARCH),ppc64le)
     CUDA_INSTALL_TARGET_DIR = targets/ppc64le-linux/
 endif
 
+
 # Debug build flags
 ifeq ($(dbg),1)
       #NVCCFLAGS += -O3
@@ -249,6 +250,8 @@ ALL_LDFLAGS :=
 #ALL_LDFLAGS += $(ALL_CCFLAGS)
 ALL_LDFLAGS += $(addprefix -Xlinker ,$(LDFLAGS))
 ALL_LDFLAGS += $(addprefix -Xlinker ,$(EXTRA_LDFLAGS))
+ALL_CCFLAGS += -g
+BUILD_TYPE := debug
 
 # Common includes and paths for CUDA
 INCLUDES  :=  -I../../common/inc
