@@ -8,6 +8,7 @@ import time
 import importlib
 import os
 from mpi4py import MPI
+from update_cm import update_cm
 # set up environment variables for MPI
 comm = MPI.COMM_WORLD
 global_rank = comm.Get_rank()
@@ -331,7 +332,7 @@ output[1]:
     - 'allparams', the output from 'assemble_allparams'
 '''
 
-def allparams_from_mapping(params_input=None):
+def allparams_from_mapping(params_input=None,cms=None):
     global template, params_file, allparam_map, model_data, data_dir
     # get raw allparams template
     with open(template, 'r') as ap:
@@ -372,6 +373,8 @@ def allparams_from_mapping(params_input=None):
         wr.writerow([str(len(params))])
         for row in allparams:
             wr.writerow(list(map(format_value, row)))
+            
+    update_cm(cms, len(params), global_rank)
     return allparams
 
 def query_neuron(lst, model_file): # MOCKUP

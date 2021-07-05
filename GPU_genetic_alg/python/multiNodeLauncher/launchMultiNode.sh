@@ -1,21 +1,47 @@
 #! /bin/bash
 
-# first job - no dependencies
-jid1=$(sbatch   job1.sh) # 2 nodes x 8 gpus
+module load cgpu
 
-# multiple jobs can depend on a single job
-slurm1=$(echo $jid1 | sed 's/[^0-9]*//g')
-jid2=$(sbatch  --dependency=afterany:$slurm1  job2.sh)  # 3 nodes x 6 gpus
-slurm2=$(echo $jid2 | sed 's/[^0-9]*//g')
-jid3=$(sbatch  --dependency=afterany:$slurm2  job3.sh) # 4 nodes x 5 gpus
-slurm3=$(echo $jid3 | sed 's/[^0-9]*//g')
-jid4=$(sbatch  --dependency=afterany:$slurm3  job4.sh) # 5 nodes x 4 gpus
-slurm4=$(echo $jid4 | sed 's/[^0-9]*//g')
-jid5=$(sbatch  --dependency=afterany:$slurm4  job5.sh) # 6 nodes x 3 gpus
-slurm5=$(echo $jid5 | sed 's/[^0-9]*//g')
-jid6=$(sbatch  --dependency=afterany:$slurm5  job6.sh)  # 9 nodes x 2 gpus
-slurm6=$(echo $jid6 | sed 's/[^0-9]*//g')
-jid7=$(sbatch  --dependency=afterany:$slurm6  job7.sh) # 8 nodes x 3 gpus
-slurm7=$(echo $jid7 | sed 's/[^0-9]*//g')
-jid8=$(sbatch  --dependency=afterany:$slurm7  job8.sh) # 9 nodes x 2 gpus
+source ./strong_benchmark_plan_pop.txt
 
+IFS=',' read -r -a cpuArray <<< "$cpuTrials"
+IFS=',' read -r -a offspringArray <<< "$offspring"
+IFS=',' read -r -a nodeArray <<< "$N"
+IFS=',' read -r -a n_stims <<< "$n_stims"
+IFS=',' read -r -a n_sfs <<< "$n_sfs"
+
+echo "Clearing Slurm..."
+rm slurm/*
+
+
+if [ "${#offspringArray[@]}" -eq "${#nodeArray[@]}" ] \
+&& [ "${#offspringArray[@]}" -eq "${#n_stims[@]}" ] \
+&& [ "${#offspringArray[@]}" -eq "${#n_sfs[@]}" ]; then
+    cpu_trial=42 # set cpus to 42 each time
+    for i in "${!nodeArray[@]}"; do
+        n_sf="${n_sfs[i]}"
+        n_stim="${n_stims[i]}"
+        nnodes="${nodeArray[i]}"
+        offspring_trial="${offspringArray[i]}"
+        # wait until debug queue is clear
+        # launch job
+        echo launching @ "$cpu_trial" cpus and "$offspring_trial" offspring and "$nnodes" nodes from `pwd` \
+         with $n_stim stims and $n_sf sfs
+        if [ -z "$JOBID" ] # no dependency
+        then
+              name=gen_alg
+              logpath=slurm/${nnodes}N${cpu_trial}C${offspring_trial}O.out
+              jid=$(sbatch  --nodes=${nnodes}  --output ${logpath} job.sh ${offspring_trial} ${n_stim} ${n_sf}) 
+              JOBID=$(echo $jid | sed 's/[^0-9]*//g')
+        else # dependency
+             logpath=slurm/${nnodes}N${cpu_trial}C${offspring_trial}O.out
+              jid=$(sbatch --dependency=afterany:$JOBID  --nodes=${nnodes} --output ${logpath} job.sh ${offspring_trial}  ${n_stim} ${n_sf} ) # 2 nodes x 8 gpus
+              # multiple jobs can depend on a single job
+              #JOBID=$(echo $jid | sed 's/[^0-9]*//g')
+        fi
+    done
+else
+    echo weak benchmark plan requires nnodes and offspring size to be same length
+fi
+
+#--output ${logpath}

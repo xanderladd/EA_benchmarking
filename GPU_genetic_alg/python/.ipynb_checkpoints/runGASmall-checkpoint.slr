@@ -6,10 +6,12 @@
 #SBATCH --mail-user=zladd@berkeley.edu
 #SBATCH --mail-type=ALL
 #SBATCH --gres=gpu:6
-#SBATCH -c 80
+#SBATCH -c 10
 #SBATCH -A m3513 
 
 
-srun -n 3  python optimize_parameters_genetic_alg.py --offspring_size 3000 --max_ngen 300
+srun -n 3  python optimize_parameters_genetic_alg.py --offspring_size 3000 --max_ngen 800 --checkpoint passive  --continu True
+
+# --continu True
 
 

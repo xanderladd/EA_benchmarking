@@ -2,3 +2,10 @@
 *.pkl
 *.prof
 *.out*
+*.csv
+*.png
+*.pdf
+*.tar.gz
+*outputs*
+*.hdf5
+*Data*

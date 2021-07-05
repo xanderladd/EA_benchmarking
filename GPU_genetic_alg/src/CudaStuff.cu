@@ -143,7 +143,7 @@ __device__ void BkSub(HMat InMat, MYSECONDFTYPE* uHP, MYSECONDFTYPE* bHP, MYSECO
 }
 #endif
 
-__device__ void runSimulation(HMat InMat, const MYFTYPE* __restrict__ ParamsM,  MYFTYPE* cCm, MYFTYPE* cm_input, MYFTYPE* ModelStates, MYFTYPE* V, Stim stim, Sim sim, MYFTYPE* VHotGlobal)
+__device__ void runSimulation(HMat InMat, const MYFTYPE* __restrict__ ParamsM, MYFTYPE*  cCm , MYFTYPE* cm_input, MYFTYPE* ModelStates, MYFTYPE* V, Stim stim, Sim sim, MYFTYPE* VHotGlobal)
 {
 
   __shared__ MYSECONDFTYPE uHP_all[(NSEG + 2)*NTRACES];
@@ -165,7 +165,6 @@ __device__ void runSimulation(HMat InMat, const MYFTYPE* __restrict__ ParamsM,  
   //printf("float cm is %f", float_cm);
   
 
-
   int Nt = stim.Nt;
   MYFTYPE t = 0;
   MYSECONDFTYPE *PX, *PF;
@@ -180,6 +179,7 @@ __device__ void runSimulation(HMat InMat, const MYFTYPE* __restrict__ ParamsM,  
 #define state_macro(stateind,segmentInd) ModelStates[NeuronID*perBlockStatesSize + stateind*NSEG+PIdx[segmentInd]]//Is this coalesced?
   MYFTYPE Vmid[NILP + 1];
   MYFTYPE v[NILP + 1];
+  MYFTYPE newCCM[(NSEG)];
   MYFTYPE dv[NILP + 1];
   MYSECONDFTYPE sumCurrents[NILP + 1];
   MYSECONDFTYPE sumCurrentsDv[NILP + 1];
@@ -196,13 +196,13 @@ __device__ void runSimulation(HMat InMat, const MYFTYPE* __restrict__ ParamsM,  
   MYFTYPE StimCurrent[NILP + 1];
   for (int count = 1; count < NILP + 1; count++) {
 	  //initialize cCm
-	  if (cCm[PIdx[count]] == 2.000000000) {
-		  cCm[PIdx[count]] = float_cm;
-          //if (NeuronID == 2) {
-           //   printf("\n ID: %i ... NEW CCM : %f", NeuronID, cCm[PIdx[count]]);
-             // printf("\n should be %f", cm_input[NeuronID]);
-         // }
-	}
+	 if (cCm[PIdx[count]] != 0) {
+	  //cCm[PIdx[count]] = float_cm;
+      newCCM[PIdx[count]] = float_cm;
+	} else {
+        newCCM[PIdx[count]] = cCm[PIdx[count]];
+    }
+  
     v[count] = V[PIdx[count]];
     sumCurrents[count] = 0;
     sumCurrentsDv[count] = 0;
@@ -221,7 +221,18 @@ __device__ void runSimulation(HMat InMat, const MYFTYPE* __restrict__ ParamsM,  
     for (int count1 = 0; count1 < NSTATES; count1++) {
       state_macro(count1, count) = 0;
     }
+       
   }
+  
+  //for (int count = 1; count < NILP + 1; count++) {
+      //if (cCm[PIdx[count]] != 0) {
+       //   cCm[PIdx[count]] = float_cm;
+     //      }
+   // }
+    
+   
+  
+
 
   if (Eidx[1]>InMat.N - 1) {
     Eidx[1] = InMat.N - 1;
@@ -242,7 +253,19 @@ __device__ void runSimulation(HMat InMat, const MYFTYPE* __restrict__ ParamsM,  
   MYFTYPE stimArea = stim.area;
   MYDTYPE dtCounter = 0;
   MYFTYPE  dt = sim.dt;
+  
   MYFTYPE temp;
+  
+    //printf("FLOAT CM : %f", float_cm);
+    //for (int count = 1; count < NILP + 1; count++) {
+      //if (NeuronID == 1) {
+      //if (cCm[PIdx[count]] != 0) {
+        //   printf("\n count: %i ... NEW CCM : %f", count, newCCM[PIdx[count]]);
+       //}
+    //}
+    //}
+  
+
   for (int i = 0; i<Nt; i++) {
 #ifdef STIMFROMCSV
     dt = stim.durs[i];
@@ -265,6 +288,7 @@ __device__ void runSimulation(HMat InMat, const MYFTYPE* __restrict__ ParamsM,  
         SMemVHot[recInd*WARPSIZE + i % (WARPSIZE)] = v[1];//This is going to be challenging to make it general but possible.
 
     }
+       
     for (int count = 1; count < NILP + 1; count++) {
       rhs[count] = 0;
       D[count] = 0;
@@ -287,7 +311,11 @@ __device__ void runSimulation(HMat InMat, const MYFTYPE* __restrict__ ParamsM,  
     for (int count = 1; count < NILP + 1; count++) {
       gModel[count] = (sumCurrentsDv[count] - sumCurrents[count]) / EPS_V;
       rhs[count] = StimCurrent[count] - sumCurrents[count];
-      D[count] = gModel[count] + cCm[PIdx[count]] / (dt * 1000);
+       
+      D[count] = gModel[count] + newCCM[PIdx[count]] / (dt * 1000);
+      //if (NeuronID == 1) {
+       //     printf("\n ID: %i ... NEW CCM : %f", NeuronID,cCm[PIdx[count]]);
+        //}
       D[count] -= cF[InMat.N - PIdx[count] - 1];
       dv[count] += bHP[InMat.N - parentIndex[count] - 1] - bHP[InMat.N - PIdx[count] - 1];
 
@@ -296,6 +324,10 @@ __device__ void runSimulation(HMat InMat, const MYFTYPE* __restrict__ ParamsM,  
       rhs[count] -= cF[InMat.N - PIdx[count] - 1] * dv[count];
       bHP[InMat.N - PIdx[count] - 1] = rhs[count];
       uHP[InMat.N - PIdx[count] - 1] = D[count];
+      //if (NeuronID == 60 && threadIdx.x == 1 ) {
+        //  printf("\n ID: %i ... NEW UHP : %f", NeuronID, uHP[InMat.N - PIdx[count] - 1] );
+      //}
+      
     }
     //__syncthreads();
     for (int count = 1; count < NILP + 1; count++) {
@@ -307,6 +339,7 @@ __device__ void runSimulation(HMat InMat, const MYFTYPE* __restrict__ ParamsM,  
         bHP[InMat.N - parentIndex[count] - 1] += cE[Eidx[count]] * dv[count];
         uHP[InMat.N - parentIndex[count] - 1] -= cE[Eidx[count]];
       }
+      
     }
     //__syncthreads();
     BeforeLU(InMat, uHP, bHP, InMat.Depth);
@@ -515,12 +548,13 @@ void callKernel(Stim stim, Sim sim, MYFTYPE* ParamsM, MYFTYPE* cm_input, MYFTYPE
   CUDA_RT_CALL(cudaMalloc((void**)&d_cCm, (NSEG) * sizeof(MYFTYPE)));
   CUDA_RT_CALL(cudaMemcpy(d_cCm, Mat_d.Cms, Mat_d.N * sizeof(MYFTYPE), cudaMemcpyHostToDevice));
 
-
   //This is where are all the cm values per model (block)
   CUDA_RT_CALL(cudaMalloc((void**)&d_cm_input, (NSets) * sizeof(MYFTYPE)));
   //printf("%i alloc is", NSets * sizeof(MYFTYPE));
   printf(" \n\n cm input %f \n\n",cm_input[3]);
   CUDA_RT_CALL(cudaMemcpy(d_cm_input, cm_input, NSets * sizeof(MYFTYPE) ,cudaMemcpyHostToDevice));
+  //CUDA_RT_CALL(cudaMemcpyToSymbol(d_cm_input, Mat_d.Cms, Mat_d.N * sizeof(MYFTYPE)));
+
 
   CUDA_RT_CALL(cudaMalloc((void**)&d_modelStates, (NSTATES + 1) * (NSEG) * currKernelRun * sizeof(MYFTYPE)));
   dim3 blockDim(WARPSIZE, stim.NStimuli);

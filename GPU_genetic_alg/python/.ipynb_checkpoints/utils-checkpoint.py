@@ -135,32 +135,58 @@ def getVolts(vs_fn, idx): # W
 
 
 
-def top_SFs(run_num, score_function_ordered_list, weights, nGpus, threshold=0):
-    """"    
-    finds scoring functions w/ weight over 50 and pairs them with that stim and sends
-    them to mapping function so that we will run so many processes
-    Arguments
-    --------------------------------------------------------------
-    run_num: the number of times neuroGPU has ran for 8 stims,
-    keep track of what stims we are picking out score functions for
-    """
+# def old_top_SFs(run_num, score_function_ordered_list, weights, nGpus, threshold=0):
+#     """"    
+#     finds scoring functions w/ weight over 50 and pairs them with that stim and sends
+#     them to mapping function so that we will run so many processes
+#     Arguments
+#     --------------------------------------------------------------
+#     run_num: the number of times neuroGPU has ran for 8 stims,
+#     keep track of what stims we are picking out score functions for
+#     """
     
-    all_pairs = []
-    last_stim = (run_num+1) * nGpus # ie: 0th rank last_stim = (0+1)*ngpus = ngpus
-    first_stim = last_stim - nGpus
-    if last_stim > 18:
-        last_stim = 18
-    #print(first_stim,last_stim, "first and last...... rank: ", run_num)
-    for i in range(first_stim, last_stim):#range(first_stim,last_stim):
+#     all_pairs = []
+#     last_stim = (run_num+1) * nGpus # ie: 0th rank last_stim = (0+1)*ngpus = ngpus
+#     first_stim = last_stim - nGpus
+#     if last_stim > 18:
+#         last_stim = 18
+#     #print(first_stim,last_stim, "first and last...... rank: ", run_num)
+#     for i in range(first_stim, last_stim):#range(first_stim,last_stim):
+#         sf_len = len(score_function_ordered_list)
+#         curr_weights = weights[sf_len*i: sf_len*i + sf_len] #get range of sfs for this stim
+#         #top_inds = sorted(range(len(curr_weights)), key=lambda i: curr_weights[i], reverse=True)[:10] #finds top ten biggest weight indices
+#         top_inds = np.where(curr_weights > threshold)[0] # weights bigger than 50 #TODO: maybe this can help glitch
+#         pairs = list(zip(np.repeat(i,len(top_inds)), [ind for ind in top_inds])) #zips up indices with corresponding stim # to make sure it is refrencing a relevant stim
+#         all_pairs.append(pairs)
+#     flat_pairs = [pair for pairs in all_pairs for pair in pairs] #flatten the list of tuples
+#     return flat_pairs
+    
+def top_SFs(run_num, score_function_ordered_list, weights, nGpus, max_sfs=0, threshold=50):
+        """
+        finds scoring functions w/ weight over 50 and pairs them with that stim and sends
+        them to mapping function so that we will run so many processes
+        Arguments
+        --------------------------------------------------------------
+        run_num: the number of times neuroGPU has ran for 8 stims,
+        keep track of what stims we are picking out score functions for
+        """
+        all_pairs = []
+        last_stim = (run_num + 1) * nGpus # ie: 0th run last_stim = (0+1)*8 = 8
+        first_stim = last_stim - nGpus # on the the last round this will be 24 - 8 = 16
+        if last_stim > 18:
+            last_stim = 18
+        #print(first_stim,last_stim, "first and last")
         sf_len = len(score_function_ordered_list)
-        curr_weights = weights[sf_len*i: sf_len*i + sf_len] #get range of sfs for this stim
-        #top_inds = sorted(range(len(curr_weights)), key=lambda i: curr_weights[i], reverse=True)[:10] #finds top ten biggest weight indices
-        top_inds = np.where(curr_weights > threshold)[0] # weights bigger than 50 #TODO: maybe this can help glitch
-        pairs = list(zip(np.repeat(i,len(top_inds)), [ind for ind in top_inds])) #zips up indices with corresponding stim # to make sure it is refrencing a relevant stim
-        all_pairs.append(pairs)
-    flat_pairs = [pair for pairs in all_pairs for pair in pairs] #flatten the list of tuples
-    return flat_pairs
-    
+        curr_weights = weights[sf_len*first_stim: sf_len*last_stim + sf_len] #get range of sfs for this stim
+        stim_correspondance = np.repeat(np.arange(first_stim, last_stim + 1), sf_len) # inclusive
+       # TODO make this dynamic to the number of preocessors
+        if max_sfs:
+            top_inds = curr_weights.argsort()[-(max_sfs):][::-1]
+        else:
+            top_inds = np.where(curr_weights > 50)[0]
+        all_pairs = zip(stim_correspondance[top_inds],top_inds % sf_len) #zips up indices with corresponding stim # to make sure it is refrencing a relevant stim
+        #flat_pairs = [pair for pairs in all_pairs for pair in pairs] #flatten the list of tuples
+        return list(all_pairs)
 
 # convert the allen data and save as csv
 def convert_allen_data(opt_stim_name_list, stim_file, dts):

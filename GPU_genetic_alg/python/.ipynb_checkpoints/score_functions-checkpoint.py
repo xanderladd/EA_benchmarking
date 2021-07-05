@@ -17,11 +17,10 @@ import sys
 #from concurrent.futures import ProcessPoolExecutor as Pool
 from multiprocessing import Pool
 from mpi4py import MPI
-import myGlobals
 # hack to remove eventually...imagine doing a getattr when you have the function
 # and can just do an eval :O
 thismodule = sys.modules[__name__]
-import sqlite3
+import cProfile
 
 comp_width_dict = {}
 comp_height_dict = {}
@@ -51,7 +50,8 @@ custom_score_functions = [
                     'traj_score_3',\
                     'isi',\
                     'rev_dot_product',\
-                    'KL_divergence']
+                    'KL_divergence',
+                    'l2_norm']
 
 
 
@@ -93,6 +93,10 @@ def chi_square_normal(target, data, dt=0.02, stims=None, index=None):
     score = safe_mean(diff)
     return score
 
+def l2_norm(target, data, dt=0.02, stims=None, index=None):
+    diff = np.square(np.array(target) - np.array(data))
+    score = np.sum(diff)
+    return score
 # abs_cumsum_diff takes one dimensional lists target and data and return abs(x_1 - x_2) for
 # each timepoints in the cumsum.
 def abs_cumsum_diff(target, data, dt=0.02, stims=None, index=None):
@@ -366,27 +370,7 @@ def KL_divergence (target, data, dt=0.02, stims=None, index=None):
     
     return score
 
-# # work if target & data are discrete probability distribution
-# def KL_divergence (target, data, dt=0.02, stims=None, index=None): 
-#     def shift(v):
-#         base = np.absolute(np.amin(np.array(v)))
-#         return np.array(v) + base + 0.1
 
-#     def normalize (v):
-#         return np.array(v)/float(np.sum(np.array(v)))
-
-#     def divergence (v1, v2):
-#         v1_array = np.array(v1)
-#         v2_array = np.array(v2)
-#         d = 0
-#         for i in range(0, len(v1_array)):
-#             if (v1_array[i] != 0 and v2_array[i] != 0):
-#                 d += float(v2_array[i]) * np.log(float(v2_array[i]) / v1_array[i])
-#         return d
-
-#     score = divergence(normalize(shift(target)), normalize(shift(data)))
-
-#     return score
 
 
 def traj_score_single_peak(target, data, dt=0.02, stims = None, index = None):
@@ -538,10 +522,12 @@ def normalize_scores(curr_scores, transformation):
             curr_scores[i] = transformation[4]        # Cap newValue to newMax if it is too large
     normalized_single_score = (curr_scores + transformation[5])/transformation[6]  # Normalize the new score
     if transformation[6] == 0:
-        return np.ones(len(self.nindv)) 
+        print(1/0)
+        return np.ones(len(curr_scores)) 
     return normalized_single_score
 
-
+def passive_l2_norm(target, data):
+    return np.sum((target -data)**2,axis=1)**(1./2)
 
 
 def eval_stim_sf_pair(args):
@@ -572,6 +558,7 @@ def eval_stim_sf_pair(args):
         #time = arg['start']
         start = arg["start"]
         curr_sf = arg["curr_sf"]
+        passive = arg['passive']
         if global_rank != 10:
             logging.info("process {} is {} and started at {}".format(os.getpid(), curr_sf, timer.time()))
         io_start = timer.time()
@@ -587,29 +574,37 @@ def eval_stim_sf_pair(args):
         transformation = arg["transformation"]
         dt = arg["dt"]
         computation_time_start = timer.time()
+        
+        if not passive:
+            if curr_weight == 0:
+                curr_scores = np.zeros(len(curr_data_volt))
 
-        if curr_weight == 0:
-            curr_scores = np.zeros(self.nindv)
-
+            else:
+                curr_scores = eval_function(curr_target_volt, curr_data_volt, curr_sf, dt)
+                if transformation is not None:
+                    norm_scores = normalize_scores(curr_scores, transformation)
+                else:
+                    norm_scores = np.array(curr_scores)
         else:
-            curr_scores = eval_function(curr_target_volt, curr_data_volt, curr_sf, dt)
-        norm_scores = normalize_scores(curr_scores, transformation)
-        for k in range(len(norm_scores)):
-            if np.isnan(norm_scores[k]):
-                norm_scores[k] = 1
-    #     if global_rank == 0:
-    #         print(norm_scores * curr_weight , i, j)
-        #print("making stuff took : ", time2-time," from  ", os.getpid(), "for ", curr_sf, " w/ weight", curr_weight)
+            norm_scores = passive_l2_norm(curr_target_volt, curr_data_volt)
+   
+
         computation_time_end = timer.time()
         if global_rank != 10:
             logging.info("process {} returning at {}".format(os.getpid(), timer.time()))
-        final_score += norm_scores * curr_weight 
-#    if global_rank ==0:
-#        print(final_score, i,j, "target score and an I and a J" )
-#     if global_rank ==3:
-#         print(final_score[0], i,j, "not target score and an I and a J" )    
-    
+            
+        final_score += np.array(norm_scores) * curr_weight 
+
     return final_score
+
+def wrap_para(arg):
+#     cProfile.runctx('eval_stim_sf_pair(arg)', globals(), locals(), 'profiles/prof%d.prof' % os.getpid())
+    datafn = 'profiles/prof%d.prof' % os.getpid()
+    prof = cProfile.Profile()
+    retval = prof.runcall(eval_stim_sf_pair, arg)
+    prof.dump_stats(datafn)
+    return retval
+
 
 def callPara(args):
     # using either nCpus  or 20 
@@ -617,7 +612,7 @@ def callPara(args):
         logging.info("************ launched PIDS at {} ************".format(timer.time()))
     final_res = []
     with Pool(nCpus) as p: # parallel mapping
-        res = p.map(eval_stim_sf_pair,args)
+        res = p.map(wrap_para,args)
             #final_res.append(res)
     if global_rank == 0:
         logging.info("************ finished PIDS at {} ************".format(timer.time()))

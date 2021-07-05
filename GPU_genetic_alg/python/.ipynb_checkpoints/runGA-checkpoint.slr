@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SBATCH -N 5
-#SBATCH -t 001:30:00
+#SBATCH -t 002:30:00
 #SBATCH -C gpu
 #SBATCH --mail-user=zladd@berkeley.edu
 #SBATCH --mail-type=ALL
@@ -10,4 +10,4 @@
 #SBATCH -A m3513 
 
 
-srun -n 5  python optimize_parameters_genetic_alg.py --offspring_size 3000 --max_ngen 300 --checkpoint epas --continu True
+srun -n 5  python optimize_parameters_genetic_alg.py --offspring_size 3000 --max_ngen 300 --checkpoint epas_tighten  --continu True

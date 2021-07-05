@@ -12,6 +12,7 @@ import textwrap
 import os
 from mpi4py import MPI
 import multiprocessing
+import subprocess
 # set up environment variables for MPI
 comm = MPI.COMM_WORLD
 global_rank = comm.Get_rank()
@@ -56,6 +57,12 @@ best_indvs = []
 cp_freq = 1
 old_update = algo._update_history_and_hof
 
+import psutil
+def kill(proc_pid):
+    process = psutil.Process(proc_pid)
+    for proc in process.children(recursive=True):
+        proc.kill()
+    process.kill()
 
 def get_parser():
     parser = argparse.ArgumentParser(
@@ -77,6 +84,10 @@ The folling environment variables are considered:
                         help='maximum number of generations')
     parser.add_argument('--responses', required=False, default=None,
                         help='Response pickle file to avoid recalculation')
+    parser.add_argument('--n_stims', type=int, required=False, default=1,
+                        help='number of stims to optimize over')
+    parser.add_argument('--n_sfs', type=int, required=False, default=0,
+                        help='number of score functions to use')
     parser.add_argument('--analyse', action="store_true")
     parser.add_argument('--compile', action="store_true")
     parser.add_argument('--hocanalyse', action="store_true")
@@ -129,7 +140,7 @@ def main():
                                 logging.DEBUG)[args.verbose],
                                 stream=sys.stdout)
     #opt = create_optimizer(args)
-    evaluator = hoc_ev.hoc_evaluator()
+    evaluator = hoc_ev.hoc_evaluator(args.n_stims, args.n_sfs)
     seed = os.getenv('BLUEPYOPT_SEED', args.seed)
     opt = bpop.optimisations.DEAPOptimisation(
         evaluator=evaluator,
@@ -163,5 +174,14 @@ def main():
         print ('History: ', hst, '\n')
         print ('Best individuals: ', best_indvs, '\n')
 if __name__ == '__main__':
+    
+    if global_rank == 0:
+        p = subprocess.Popen(["sh","watch_gpu_util.sh"])
+        
     main()
+    
+    if global_rank == 0:
+        p.kill()
+        kill(p.pid)
+
     logging.info("absolute end : " + str(time.time()))

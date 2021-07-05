@@ -3,30 +3,30 @@ import h5py
 import bluepyopt as bpop
 import nrnUtils
 import score_functions as sf
-import efel
-import pandas as pd
+#import efel
+#import pandas as pd
 import os
 import subprocess
 import re
 import time
-import shutil
+#import shutil
 import struct
-import cProfile
-import glob
-import ctypes
+#import cProfile
+#import glob
+#import ctypes
 #import matplotlib.pyplot as plt
-from extractModel_mappings import   allparams_from_mapping
+from extractModel_mappings import allparams_from_mapping
 import bluepyopt.deapext.algorithms as algo
-from concurrent.futures import ProcessPoolExecutor as Pool
-from concurrent.futures import ProcessPoolExecutor
-import sqlite3
+#from concurrent.futures import ProcessPoolExecutor as Pool
+#from concurrent.futures import ProcessPoolExecutor
 import io
 import matplotlib.pyplot as plt
-
+import copy
 #from ray.util.multiprocessing import Pool
-import multiprocessing
+#import multiprocessing
+import matplotlib.pyplot as plt
 import csv
-import ap_tuner as tuner
+#import ap_tuner as tuner
 import logging
 from mpi4py import MPI
 #set_start_method("spawn")
@@ -59,7 +59,8 @@ custom_score_functions = [
                     'traj_score_3',\
                     'isi',\
                     'rev_dot_product',\
-                    'KL_divergence']
+                    'KL_divergence',
+                    'l2_norm']
 
 # Number of timesteps for the output volt.
 ntimestep = 10000
@@ -126,12 +127,14 @@ def nrnMreadH5(fileName):
     return np.array(dat)
 
 class hoc_evaluator(bpop.evaluators.Evaluator):
-    def __init__(self):
+    def __init__(self, n_stims, n_sfs):
         """Constructor"""
+        self.n_stims = n_stims
+        self.n_sfs = n_sfs
         data = nrnUtils.readParamsCSV(paramsCSV)
         super(hoc_evaluator, self).__init__()
-        self.orig_params = orig_params
         self.opt_ind = np.array(params_opt_ind)
+        alldata = np.array(copy.deepcopy(data))
         data = np.array([data[i] for i in self.opt_ind])
         realData = utils.readParamsCSV(templateCSV)
         realOrig = np.array((np.array(realData)[:,1]), dtype=np.float64)
@@ -145,32 +148,39 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
         for param_idx in range(len(self.orig_params)):
             if param_idx in self.opt_ind:
                 idx = np.where(self.opt_ind == param_idx)
+                if self.orig_params[param_idx] < 0:
+                    self.orig_params[param_idx], self.pmin[idx],self.pmax[idx] = np.abs(self.orig_params[param_idx]), np.abs(self.pmin[idx]), np.abs(self.pmax[idx])
                 if np.isclose(self.orig_params[param_idx],self.pmin[idx],rtol=.000001) and np.isclose(self.pmin[idx],self.pmax[idx],rtol=.000001):
-                    #self.fixed[param_idx] = self.orig_params[param_idx]
+                    self.fixed[param_idx] = self.orig_params[param_idx]
                     self.params.append(bpop.parameters.Parameter(self.orig_params[param_idx], bounds=(self.pmin[idx][0]*.999999,self.pmax[idx][0]*1.00001)))
                     counter  +=1 
 
                 else:
                     counter +=1
                     self.params.append(bpop.parameters.Parameter(self.orig_params[param_idx], bounds=(self.pmin[idx][0],self.pmax[idx][0]))) # this indexing is annoying... pmax and pmin weird shape because they are numpy arrays, see idx assignment on line 125... how can this be more clear
+                print("opt : ", alldata[param_idx,0], "bounds :", self.pmin[idx][0] , self.pmax[idx][0])
             else:
-                #self.fixed[param_idx] = self.orig_params[param_idx]
-                self.params.append(bpop.parameters.Parameter(66.56, bounds=(40,90)))
+                self.fixed[param_idx] = self.orig_params[param_idx]
+                print("fixed : ", alldata[param_idx,0],  "val :", alldata[param_idx,1])
+                #self.params.append(bpop.parameters.Parameter(66.56, bounds=(40,90)))
 
         self.weights = opt_weight_list
         self.opt_stim_list = [e.decode('ascii') for e in opt_stim_name_list if len(e.decode('ascii')) < 8 ]
         self.objectives = [bpop.objectives.Objective('Weighted score functions')]
-        if global_rank == 0:
+        #if global_rank == 0:
             #io_start = time.time()
             #self.target_volts_list = self.make_target_volts(realOrig, self.opt_stim_list)
             #io_end = time.time()
             #logging.info("IO:: " + str(io_end - io_start))
-            self.target_volts_list = [target_volts_hdf5[s][:] for s in self.opt_stim_list]#np.genfromtxt("targetVolts.csv", delimiter=",")#self.make_target_volts(realOrig, self.opt_stim_list)
-            #realOrig[1] = -72
             #self.make_target_volts(realOrig, self.opt_stim_list)
-        else:
-            self.target_volts_list = None
-        self.target_volts_list = comm.bcast(self.target_volts_list, root=0)
+
+            #self.target_volts_list = [target_volts_hdf5[s][:] for s in self.opt_stim_list]#np.genfromtxt("targetVolts.csv", delimiter=",")#self.make_target_volts(realOrig, self.opt_stim_list)
+            #realOrig[1] = -72
+       #else:
+           # self.target_volts_list = None
+            
+        self.target_volts_list = [target_volts_hdf5[s][:] for s in self.opt_stim_list]
+        #self.target_volts_list = comm.bcast(self.target_volts_list, root=0)
         
         self.dts = []
         self.num_gen = 0
@@ -218,7 +228,7 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
             ind.fitness.values = fit
         return len(invalid_ind)
     
-    def top_SFs(self, run_num):
+    def old_top_SFs(self, run_num):
         """
         finds scoring functions w/ weight over 50 and pairs them with that stim and sends
         them to mapping function so that we will run so many processes
@@ -237,12 +247,40 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
             sf_len = len(score_function_ordered_list)
             curr_weights = self.weights[sf_len*i: sf_len*i + sf_len] #get range of sfs for this stim
             #top_inds = sorted(range(len(curr_weights)), key=lambda i: curr_weights[i], reverse=True)[:10] #finds top ten biggest weight indices
-            top_inds = np.where(curr_weights > 0)[0] # weights bigger than 50
+            top_inds = np.where(curr_weights > 50)[0] # weights bigger than 50
+            if passive:
+                top_inds = np.where(curr_weights > 0)[0]
             pairs = list(zip(np.repeat(i,len(top_inds)), [ind for ind in top_inds])) #zips up indices with corresponding stim # to make sure it is refrencing a relevant stim
             all_pairs.append(pairs)
         flat_pairs = [pair for pairs in all_pairs for pair in pairs] #flatten the list of tuples
         return flat_pairs
-
+    
+    def top_SFs(self, run_num, max_sfs=0):
+        """
+        finds scoring functions w/ weight over 50 and pairs them with that stim and sends
+        them to mapping function so that we will run so many processes
+        Arguments
+        --------------------------------------------------------------
+        run_num: the number of times neuroGPU has ran for 8 stims,
+        keep track of what stims we are picking out score functions for
+        """
+        all_pairs = []
+        last_stim = (run_num + 1) * nGpus # ie: 0th run last_stim = (0+1)*8 = 8
+        first_stim = last_stim - nGpus # on the the last round this will be 24 - 8 = 16
+        if last_stim > 18:
+            last_stim = 18
+        #print(first_stim,last_stim, "first and last")
+        sf_len = len(score_function_ordered_list)
+        curr_weights = self.weights[sf_len*first_stim: sf_len*last_stim + sf_len] #get range of sfs for this stim
+        stim_correspondance = np.repeat(np.arange(first_stim, last_stim + 1), sf_len) # inclusive
+       # TODO make this dynamic to the number of preocessors
+        if max_sfs:
+            top_inds = curr_weights.argsort()[-(max_sfs):][::-1]
+        else:
+            top_inds = np.where(curr_weights > 50)[0]
+        all_pairs = zip(stim_correspondance[top_inds],top_inds % sf_len) #zips up indices with corresponding stim # to make sure it is refrencing a relevant stim
+        #flat_pairs = [pair for pairs in all_pairs for pair in pairs] #flatten the list of tuples
+        return list(all_pairs)
     
     def run_model(self,stim_ind, params):
         """
@@ -280,7 +318,7 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
         --------------------
         2d list of scalar scores for each parameter set w/ shape (nindv,nstims)
         '''
-        fxnsNStims = self.top_SFs(run_num) # 52 stim-sf combinations (stim#,sf#)
+        fxnsNStims = self.top_SFs(run_num, self.n_sfs) # 52 stim-sf combinations (stim#,sf#)
         args = []
         f = h5py.File("/tmp/{}.hdf5".format(global_rank), "w")
 
@@ -294,9 +332,10 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
                 
                 trasformation_const = h5py.File(scores_path+self.opt_stim_list[i]+'_scores.hdf5', 'r')['transformation_const_'+score_function_ordered_list[j].decode('ascii')][:]
             except:
-                all_scores = os.listdir("../../scores")
-                choice = np.random.choice(all_scores)
-                trasformation_const = h5py.File(scores_path+choice, 'r')['transformation_const_'+score_function_ordered_list[j].decode('ascii')][:]
+                trasformation_const=None
+#                 all_scores = os.listdir("../../scores")
+#                 choice = np.random.choice(all_scores)
+#                 trasformation_const = h5py.File(scores_path+choice, 'r')['transformation_const_'+score_function_ordered_list[j].decode('ascii')][:]
                 
 
 
@@ -310,6 +349,7 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
                 "transformation": trasformation_const,
                 "dt": self.dts[i], #TODO: revisit hacking this
                 "start": time.time(),
+                "passive": passive
             }
             args.append(argDict)
         
@@ -323,6 +363,13 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
         res = np.array(list(res)) ########## important: map returns results with shape (# of sf stim pairs, nindv)
         end = time.time()
         print("all evals took :" , end - start)
+        if passive:
+            #print(res.T.shape, "RES SHAPE")
+            return res.T
+        if len(res) == 0:
+            print("WARNING : RES is EMPTY")
+            return res
+        
         res = res[:,:] 
         prev_sf_idx = 0 
         # look at key of each stim score pair to see how many stims to sum
@@ -376,6 +423,7 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
         --------------------
         2d list of scalar scores for each parameter set w/ shape (nindv,1)
         '''
+        global nGpus # can we avoid thiss.....
         self.dts = []
         self.nindv = len(param_values)
         self.data_volts_list = np.array([])
@@ -389,19 +437,19 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
             logging.info("IO:: " + str(io_end - io_start))
             # insert negative param value back in to each set
             #full_params = np.insert(np.array(param_values), 1, orig_params[1], axis = 1)
-            full_params = None
-#             for reinsert_idx in self.fixed.keys():
-#                 self.fixed[reinsert_idx] = -72
-#                 param_values = np.insert(np.array(param_values), reinsert_idx, self.fixed[reinsert_idx], axis = 1)
-#                 full_params = param_values
             param_values = np.array(param_values)
+            param_values[0] =  np.array(orig_params)[self.opt_ind]
+            param_values[2] =  np.array(orig_params)[self.opt_ind]
             param_values[:,1] = -param_values[:,1]
-            param_values[0] =  np.array(orig_params)
-            param_values[1] =  np.array(orig_params)
-        
+            #print(param_values)
 
-            #param_values[5] =  np.array(orig_params)
-#             param_values =  np.tile(np.array(orig_params), len(param_values)).reshape( len(param_values), len(orig_params))
+
+
+            for reinsert_idx in self.fixed.keys():
+                param_values = np.insert(np.array(param_values), reinsert_idx, self.fixed[reinsert_idx], axis = 1)
+#                 full_params = param_values
+            #param_values[1] =  np.array(orig_params)[self.opt_ind]
+            print(param_values[2])
         else:
             full_params = None
             self.dts = None
@@ -418,14 +466,17 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
         if global_rank == size -1:
             myChunk = (myChunk[0],len(param_values))
         param_values = param_values[myChunk[0]:myChunk[1],:]
+        cms = param_values[:,-1:]
+        param_values = param_values[:,:-1]
+        
+        
         # revisit use of this var when you clean
         my_nindv = len(param_values)
-
         self.dts = comm.bcast(self.dts, root=0)
+        allparams = allparams_from_mapping(list(param_values),cms=cms)
+        param_values = np.append(param_values, cms, axis=1)
         
-        allparams = allparams_from_mapping(list(param_values))
-        
-        nstims = len(self.opt_stim_list) -  (len(self.opt_stim_list) % nGpus) # cut off stims that 
+        nstims = min(self.n_stims, len(self.opt_stim_list) -  (len(self.opt_stim_list) % nGpus)) # cut off stims that 
         # would make us do inefficient GPU batch
         print("NSTIMS is: ", nstims)
         start_time_sim = time.time()
@@ -437,6 +488,7 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
         run_num = 0
         all_volts = []
         all_params = []
+        nGpus = min(nstims, len([devicenum for devicenum in os.environ['CUDA_VISIBLE_DEVICES'] if devicenum != ","]))
 
         
         #start running neuroGPU
@@ -450,26 +502,15 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
             end_times.append(time.time())
             print("ADDED END TIME for ", i)
             shaped_volts = self.getVolts(i)
-#             if global_rank == 0: #and i > 2 and i < 5:
-#                 plt.plot(shaped_volts[10,:], color="blue")
-#                 plt.plot(self.target_volts_list[i], color="red")
+            
 
-#                 plt.savefig("test_p{}".format(i))
-#                 plt.close()
-#                 print(param_values)
-#                 print(orig_params)
-#                 print(orig_params == param_values)
-#                 print("##########################################")
-#             if i > 6:
-#                 print(1/0)
-
-            if i == 0:
-                ap_check_score = utils.check_ap_at_zero(i, shaped_volts, opt_stim_name_list, stim_file).reshape(-1,1)
-                nospike_score = np.array([utils.noSpikePen(volts, self.target_volts_list[i]) for volts in shaped_volts]).reshape(-1,1)
+            #if i == 0:
+#                 ap_check_score = utils.check_ap_at_zero(i, shaped_volts, opt_stim_name_list, stim_file).reshape(-1,1)
+#                 nospike_score = np.array([utils.noSpikePen(volts, self.target_volts_list[i]) for volts in shaped_volts]).reshape(-1,1)
 #                 spike_score = np.array([utils.SpikePen(volts, self.target_volts_list[i]) for volts in shaped_volts]).reshape(-1,1)
-            else:
-                ap_check_score = np.append(ap_check_score, utils.check_ap_at_zero(i, shaped_volts, opt_stim_name_list, stim_file).reshape(-1,1),axis=1)
-                nospike_score = np.append(nospike_score, np.array([utils.noSpikePen(volts, self.target_volts_list[i]) for volts in shaped_volts]).reshape(-1,1), axis=1)
+           # else:
+#                 ap_check_score = np.append(ap_check_score, utils.check_ap_at_zero(i, shaped_volts, opt_stim_name_list, stim_file).reshape(-1,1),axis=1)
+#                 nospike_score = np.append(nospike_score, np.array([utils.noSpikePen(volts, self.target_volts_list[i]) for volts in shaped_volts]).reshape(-1,1), axis=1)
 #                 spike_score = np.append(nospike_score, np.array([utils.SpikePen(volts, self.target_volts_list[i]) for volts in shaped_volts]).reshape(-1,1), axis=1)
 
             if idx == 0:
@@ -492,7 +533,10 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
                 else:
                     self.targV = self.target_volts_list[i-nGpus+1:i+1] # i = 15, i-nGpus+1 = 8, i+1 = 16 
                     self.curr_dts = self.dts[i-nGpus+1:i+1] # so therefore we get range(8,16) for dts and targ vs
-                    score = np.append(score,self.map_par(run_num),axis =1) #stacks scores by stim
+                    curr_score = self.map_par(run_num)
+                    if len(curr_score) > 0:
+                        print('PRINTING A SECOND WARNING --> SCORE IS EMPTY')
+                        score = np.append(score,curr_score, axis =1) #stacks scores by stim
                     
                 eval_end = time.time()
                 eval_times.append(eval_end - eval_start)
@@ -505,8 +549,6 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
                 self.data_volts_list = np.array([])
                 run_num += 1
         
-        comm.gather(all_params, root=0)
-        comm.gather(np.swapaxes(all_volts,0,1), root=0)
 
         print("average neuroGPU runtime: ", np.mean(np.array(end_times) - np.array(start_times)))
         if global_rank ==0:
@@ -528,10 +570,10 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
             logging.info("gen" + str(self.num_gen) + " took: " + str(eval_end - start_time_sim))
         print(score.shape, "SCORE SHAPE")
         score = np.reshape(np.sum(score,axis=1), (-1,1))
-        ap_check_score = np.sum(ap_check_score, axis=1).reshape(-1,1)
-        nospike_score = np.sum(nospike_score, axis=1).reshape(-1,1)
+       #ap_check_score = np.sum(ap_check_score, axis=1).reshape(-1,1)
+        #nospike_score = np.sum(nospike_score, axis=1).reshape(-1,1)
 
-        score += ap_check_score
+        #score += ap_check_score
         #score += nospike_score
         score = comm.gather(score, root=0)
         score = comm.bcast(score, root=0)
@@ -542,18 +584,50 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
         # Minimum element indices in list 
         # Using list comprehension + min() + enumerate() 
         temp = min(final_score) 
-        #print(final_score)
-        
-        # We can also close the connection if we are done with it.
-        # Just be sure any changes have been committed or they will be lost.
-        #con.close()
 
         res = [i for i, j in enumerate(final_score) if j == temp] 
         print("The Positions of minimum element : " + str(res)) 
         print("And that is : ", final_score[res])
         print(final_score.shape, "SCORE SHAPE")
         
-        if global_rank ==0:
+        
+        all_volts = np.swapaxes(all_volts,0,1)
+#         ap = comm.gather(all_params, root=0)
+#         start = time.time()
+#         av = comm.gather(all_volts, root=0)
+#         if global_rank ==0:
+#             av = np.concatenate(av,axis=0)
+#             ap = np.concatenate(ap,axis=0)
+#             print(av.shape, global_rank, "AV SHAPE AND DRANK")
+#             print(ap.shape, "AP shape")
+#         end = time.time()
+
+        adjusted_res = res[0] % my_nindv
+        best_rank = res[0] // my_nindv
+        if best_rank == size-1:
+            adjusted_res += 1
+        if best_rank != 0:
+            if global_rank ==best_rank:
+                send_volts = np.ascontiguousarray(all_volts[adjusted_res])
+                send_params =  np.ascontiguousarray(all_params[adjusted_res])
+                comm.Send(send_volts, dest=0,tag=1)
+                comm.Send(send_params, dest=0,tag=2)
+            if global_rank == 0:
+                hof_inducted_volts = np.zeros(all_volts[0].shape)
+                hof_inducted_params = np.zeros(all_params[0].shape)
+                comm.Recv(hof_inducted_volts, source=best_rank,tag=1)
+                comm.Recv(hof_inducted_params, source=best_rank,tag=2)
+                #print(hof_inducted_params,  ap[res[0]])
+                #print(hof_inducted_volts.shape, av[res[0]].shape)
+                #assert (hof_inducted_volts == av[res[0]]).all()
+                #assert (hof_inducted_params == ap[res[0]]).all()
+        else:
+            hof_inducted_volts = all_volts[res[0]]
+            hof_inducted_params = all_params[res[0]]
+            print("hof inducted: ", hof_inducted_params)
+
+
+        if global_rank ==0 and visualize:
             if os.path.isfile('genResults.hdf5'):
                 f = h5py.File('genResults.hdf5','r+')
             else:
@@ -568,11 +642,16 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
                 save_num = 0
             save_num = str(save_num)
             print(save_num, "SAVE NUM")
-            print(all_volts[res].shape, "all v rse!")
-            f.create_dataset('best_volts/{}'.format(save_num), data=all_volts[res])
-            f.create_dataset('best_params/{}'.format(save_num), data=all_params[res])
-
+            f.create_dataset('best_volts/{}'.format(save_num), data=hof_inducted_volts)
+            f.create_dataset('best_params/{}'.format(save_num), data=hof_inducted_params)
             f.close()
+            for v_idx,volt in enumerate(hof_inducted_volts):
+                fig = plt.figure()
+                plt.plot(hof_inducted_volts[v_idx],label='neuroGPU')
+                plt.plot(self.target_volts_list[v_idx],label='target')
+                plt.legend()
+                plt.savefig("volt_pic/volts{}".format(v_idx))
+                plt.close()                
        
         return final_score
 
