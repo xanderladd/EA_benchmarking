@@ -1,5 +1,0 @@
-nGens=3
-offspring=1000
-cpuTrials=10,20,35,50,65,80
-N=1
-clean=False

@@ -172,7 +172,7 @@ def convert_allen_data(opt_stim_name_list, stim_file, dts):
         # remove this somehow
         if len(opt_stim_name_list[i]) > 8:
             continue
-        stim = opt_stim_name_list[i]
+        stim = opt_stim_name_list[i].decode('ASCII')
         dt = stim_file[stim+'_dt'][:][0]# refactor this later to be read or set to .02 if not configured
         dts.append(dt)
         f = open ("../Data/times{}.csv".format(i), 'w')

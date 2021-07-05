@@ -28,10 +28,11 @@ run_volts_path ='../' # archival: '../../run_volts_bbp_full_gpu_tuned/'
 # target_volts_path = './target_volts/allen_data_target_volts_10000.hdf5'
 # stims_path = run_volts_path+'/stims/allen_data_stims_10000.hdf5'
 
-# new model
+# new mode
 objectives_file = h5py.File('./objectives/allen485835016_objectives.hdf5', 'r')
 target_volts_path = './target_volts/target_volts_485835016.hdf5'
 stims_path = run_volts_path+'/stims/stims_485835016.hdf5'
+visualize=False
 
 
 
@@ -70,4 +71,4 @@ custom_score_functions = [
                     'KL_divergence']
 
 
-orig_params = [0.0000022060, -66.5600000000, 4.0383444556,3.1263250613,0.0047147854,2.8515288117, 5.1781678079, 0.1096452854,0.0005345695, 0.1578655731,0.0016590198, 3.7929209114, 0.0036489355,0.0002609501]
+# orig_params = [0.0000022060, -66.5600000000, 4.0383444556,3.1263250613,0.0047147854,2.8515288117, 5.1781678079, 0.1096452854,0.0005345695, 0.1578655731,0.0016590198, 3.7929209114, 0.0036489355,0.0002609501]

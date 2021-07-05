@@ -1,4 +1,0 @@
-JOBID   USER       STAT   SLOTS    QUEUE       START_TIME    FINISH_TIME   JOB_NAME                      
-1041320 zladd      PEND      -     batch             -             -       gen_alg                       
-1041445 zladd      PEND      -     batch             -             -       gen_alg                       
-1041446 zladd      PEND      -     batch             -             -       gen_alg                       

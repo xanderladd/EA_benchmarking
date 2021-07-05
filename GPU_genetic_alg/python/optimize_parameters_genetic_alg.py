@@ -10,6 +10,8 @@ import argparse
 import time
 import textwrap
 import os
+import cProfile
+import shutil
 
 from mpi4py import MPI
 import multiprocessing
@@ -45,7 +47,6 @@ logging.basicConfig(filename=filename, level=logging.DEBUG)
 logging.info("absolute start : " + str(time.time()) + " from rank" + str(global_rank))
 
 
-
 #if size > 1:
 logging.info("USING MPI : TRUE")
 import hoc_evaluatorGPU_MPI3 as hoc_ev
@@ -57,12 +58,20 @@ import hoc_evaluatorGPU_MPI3 as hoc_ev
 nGpus = len([devicenum for devicenum in os.environ['CUDA_VISIBLE_DEVICES'] if devicenum != ","])
 logging.info("nGPUS :" + str(nGpus))
     #assert nGpus == 8 # this only works if you have 8 gpus, if you are using 6 run the the tests instead
-
+if global_rank == 0 and os.path.isfile("gpu_utillization.log"):
+    os.remove("gpu_utillization.log")
 
 gen_counter = 0
 best_indvs = []
 cp_freq = 1
 old_update = algo._update_history_and_hof
+
+import psutil
+def kill(proc_pid):
+    process = psutil.Process(proc_pid)
+    for proc in process.children(recursive=True):
+        proc.kill()
+    process.kill()
 
 
 def get_parser():
@@ -83,6 +92,10 @@ The folling environment variables are considered:
                         help='number of individuals in offspring')
     parser.add_argument('--max_ngen', type=int, required=False, default=2,
                         help='maximum number of generations')
+    parser.add_argument('--n_stims', type=int, required=False, default=1,
+                        help='number of stims to optimize over')
+    parser.add_argument('--n_sfs', type=int, required=False, default=0,
+                        help='number of score functions to use')
     parser.add_argument('--responses', required=False, default=None,
                         help='Response pickle file to avoid recalculation')
     parser.add_argument('--analyse', action="store_true")
@@ -138,7 +151,7 @@ def main(pool):
                                 stream=sys.stdout)
     #opt = create_optimizer(args)
     print(args.max_ngen, "MAX NGEN")
-    evaluator = hoc_ev.hoc_evaluator(pool)
+    evaluator = hoc_ev.hoc_evaluator(pool, args.n_stims, args.n_sfs)
     seed = os.getenv('BLUEPYOPT_SEED', args.seed)
     opt = bpop.optimisations.DEAPOptimisation(
         evaluator=evaluator,
@@ -173,6 +186,16 @@ def main(pool):
         print ('Best individuals: ', best_indvs, '\n')
 if __name__ == '__main__':
     import multiprocessing as mp
-    pool = mp.Pool(160)
-    main(pool)
+    pool = mp.Pool(100)
+    import subprocess
+    if global_rank == 0:
+        p = subprocess.Popen(["sh","watch_gpu_util.sh"])#subprocess.Popen(["python", "/gpfs/alpine/scratch/zladd/nro106/axonproj/benchmarking/GPU_genetic_alg/python/monitor_gpu.py"])
+    datafn = 'main.prof'
+    prof = cProfile.Profile()
+    retval = prof.runcall(main, pool)
+    prof.dump_stats(datafn)
+#     main(pool)
+    if global_rank == 0:
+        p.kill()
+        kill(p.pid)
     logging.info("absolute end : " + str(time.time()))

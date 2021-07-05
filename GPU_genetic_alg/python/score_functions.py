@@ -22,6 +22,8 @@ import sys
 # import pprint
 from mpi4py import MPI
 import cProfile
+from scipy.signal import argrelextrema
+
 comm = MPI.COMM_WORLD
 global_rank = comm.Get_rank()
 size = comm.Get_size()
@@ -103,6 +105,12 @@ def find_positive_inds(lis):
 def find_peaks(lis, min_value):
     inds = [i for i in range(1, len(lis) - 1) if lis[i] >= lis[i - 1] and lis[i] >= lis[i + 1] and lis[i] >= min_value]
     return [lis[i] for i in inds], inds
+
+# def find_peaks(lis, min_value):
+#     lis = np.array(lis)
+#     inds = np.argwhere(lis[argrelextrema(lis, np.greater)] >= min_value)
+#     vals = lis[inds]
+#     return vals, inds
 
 def diff(lis):
     return [lis[i + 1] - lis[i] for i in range(0, len(lis) - 1)]
@@ -562,7 +570,7 @@ def normalize_scores(curr_scores, transformation):
             curr_scores[i] = transformation[4]        # Cap newValue to newMax if it is too large
     normalized_single_score = (curr_scores + transformation[5])/transformation[6]  # Normalize the new score
     if transformation[6] == 0:
-        return np.ones(len(self.nindv)) 
+        return np.ones(len(curr_scores)) 
     return normalized_single_score
 
 
@@ -606,17 +614,13 @@ def eval_stim_sf_pair(args):
 #         curr_target_volt =f["target_volt{}{}".format(i,j)][:]
         io_end = timer.time()
         #logging.info("IO:: " + str(io_end - io_start))
-
-
-        #time2 = timer.time()
-        
         curr_weight = arg["weight"]
         transformation = arg["transformation"]
         dt = arg["dt"]
         computation_time_start = timer.time()
 
         if curr_weight == 0:
-            curr_scores = np.zeros(self.nindv)
+            curr_scores = np.zeros(len(curr_data_volt))
 
         else:
             strt = timer.time()
@@ -653,7 +657,7 @@ def callPara(p,args):
     start = timer.time()
     res = p.map(wrap_para,args)
     end = timer.time()
-
+    print(end-start)
 
 #    res = map(eval_stim_sf_pair,args)
 #     print("ojIBIBIBIBPBPIBNIBIJNJI JNJNJINPINPINIJPN")
