@@ -1,0 +1,8 @@
+nGens=1
+offspring=3000
+cpuTrials=42
+N=16
+n_stims=8
+n_sfs=20
+novel=False
+delete=False
