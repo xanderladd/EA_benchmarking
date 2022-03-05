@@ -1,0 +1,9 @@
+
+./runModel.hoc.c: ../runModel.hoc.mod
+	@printf " -> $(C_GREEN)NMODL$(C_RESET) $<\\n"
+	(cd ".."; MODLUNIT=$(NRNUNITS) $(NOCMODL) runModel.hoc.mod -o "/global/cscratch1/sd/zladd/benchmarking/core_neuron_genetic_alg/python/x86_64")
+
+./runModel.hoc.o: ./runModel.hoc.c
+	@printf " -> $(C_GREEN)Compiling$(C_RESET) $<\\n"
+	$(COMPILE) -I".." $(INCLUDES) -fPIC -c $< -o $@
+
