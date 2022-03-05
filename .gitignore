@@ -7,9 +7,9 @@
 *.hdf5
 *.log
 *.png
+*.pdf
 */.ipynb_checkpoints/*
 #*/__pycache__/*
 */*outputs*/*
-*
 !*.py
-
+*/.ipython/*

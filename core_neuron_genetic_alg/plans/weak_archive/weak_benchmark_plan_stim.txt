@@ -1,0 +1,6 @@
+nGens=1
+offspring=500,500,500,500
+N=1,3,6,9
+n_stims=1,6,12,18
+n_sfs=20,20,20,20
+clean=False
