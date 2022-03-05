@@ -1,0 +1,7 @@
+INFO:root:absolute start : 1641877587.012954 from rank0
+INFO:root:USING MPI : TRUE
+DEBUG:asyncio:Using selector: EpollSelector
+DEBUG:asyncio:Using selector: EpollSelector
+DEBUG:traitlets:Importing canning map
+INFO:root:Generation took 0:56:18.946187
+INFO:root:Generation took 0:44:07.137324
