@@ -12,54 +12,78 @@ import textwrap
 import os
 import cProfile
 import shutil
-
+import glob
 from mpi4py import MPI
 import multiprocessing
 # set up environment variables for MPI
+import logging
 
 comm = MPI.COMM_WORLD
-global_rank = comm.Get_rank()
-size = os.environ['OMPI_COMM_WORLD_LOCAL_SIZE']#comm.Get_size()
+size = comm.Get_size()
+nGpus = min(8,len([devicenum for devicenum in os.environ['CUDA_VISIBLE_DEVICES'] if devicenum != ","]))
+
+total_rank = comm.Get_rank()
+global_rank = comm.Get_rank() // nGpus
+local_rank = comm.Get_rank() % nGpus
+total_size = comm.Get_size()
+global_size = int(os.environ['SLURM_NNODES'])
+
+import hoc_evaluatorGPU_MPI3 as hoc_ev
 
 import logging.config
-logging.config.dictConfig({
-    'version': 1,
-    'disable_existing_loggers': True,
-})
+# logging.config.dictConfig({
+#     'version': 1,
+#     'disable_existing_loggers': True,
+# })
+filename = "runTimeLogs/runTime.log"
 
 import logging.handlers
 import os
-if global_rank == 0:
-    filename = "runTimeLogs/runTime.log"
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+# formatter = logging.Formatter(fmt="%(asctime)s %(levelname)s: %(message)s", 
+#                           datefmt="%Y-%m-%d - %H:%M:%S")
+
+
+if total_rank == 0:
     # your logging setup
     should_roll_over = os.path.isfile(filename)
-    handler = logging.handlers.RotatingFileHandler(filename, mode='w', backupCount=15, delay=True)
+    fh = logging.handlers.RotatingFileHandler(filename, mode='w', backupCount=15, delay=True)
     if should_roll_over:  # log already exists, roll over!
-        handler.doRollover()
-else:
-    filename = None
+        print("######### ROLL OVER #######")
+        fh.doRollover()
     
-filename = comm.bcast(filename, root=0)
+if total_rank != 0:
+    fh = logging.handlers.RotatingFileHandler(filename, mode='w', backupCount=15, delay=True)
+
     
-import logging
-logger = logging.getLogger(__name__)
-logging.basicConfig(filename=filename, level=logging.DEBUG)
-logging.info("absolute start : " + str(time.time()) + " from rank" + str(global_rank))
+comm.barrier()
+fh.setLevel(logging.DEBUG)
+# fh.setFormatter(formatter)
+logger.addHandler(fh)
+logger.propagate = False
+
+# logging.config.dictConfig({ 'version': 1, 'filename':filename, 'level': logging.DEBUG})#, 'disable_existing_loggers': True })
+# logging.basicConfig(filename=filename, level=logging.DEBUG)
+logger.info("absolute start : " + str(time.time()) + " from rank" + str(global_rank))
+
 
 
 #if size > 1:
-logging.info("USING MPI : TRUE")
-import hoc_evaluatorGPU_MPI3 as hoc_ev
+logger.info("USING MPI : TRUE")
 # else:
 #     logging.info("USING MPI : FALSE")
 #     import hoc_evaluatorGPU_BBP_par as hoc_ev
 
     #testing
 nGpus = len([devicenum for devicenum in os.environ['CUDA_VISIBLE_DEVICES'] if devicenum != ","])
-logging.info("nGPUS :" + str(nGpus))
+logger.info("nGPUS :" + str(nGpus))
     #assert nGpus == 8 # this only works if you have 8 gpus, if you are using 6 run the the tests instead
-if global_rank == 0 and os.path.isfile("gpu_utillization.log"):
-    os.remove("gpu_utillization.log")
+# if global_rank == 0 and os.path.isfile("gpu_utillization.log"):
+#     os.remove("gpu_utillization.log")
+open('gpu_utillization.log', 'a+').close()
+
 
 gen_counter = 0
 best_indvs = []
@@ -96,6 +120,10 @@ The folling environment variables are considered:
                         help='number of stims to optimize over')
     parser.add_argument('--n_sfs', type=int, required=False, default=0,
                         help='number of score functions to use')
+    parser.add_argument('--n_cpus', type=int, required=False, default=0,
+                        help='number of cpu cores to use')
+    parser.add_argument('--sf_module', type=str, required=False, default='efel',
+                        help='number of cpu cores to use')
     parser.add_argument('--responses', required=False, default=None,
                         help='Response pickle file to avoid recalculation')
     parser.add_argument('--analyse', action="store_true")
@@ -150,8 +178,13 @@ def main(pool):
                                 logging.DEBUG)[args.verbose],
                                 stream=sys.stdout)
     #opt = create_optimizer(args)
-    print(args.max_ngen, "MAX NGEN")
-    evaluator = hoc_ev.hoc_evaluator(pool, args.n_stims, args.n_sfs)
+#     print(args.max_ngen, "MAX NGEN")
+#     if glob.glob(f"outputs/{size}N_{args.n_cpus}C_{args.offspring_size}O_{args.n_stims}S_{args.n_sfs}SF*"):
+#         print(f"outputs/{size}N_{args.n_cpus}C_{args.offspring_size}O_{args.n_stims}S_{args.n_sfs}SF*)", "exists... exiting....")
+#         exit()
+#     else:
+#         print(f"outputs/{size}N_{args.n_cpus}C_{args.offspring_size}O_{args.n_stims}S_{args.n_sfs}SF*)")
+    evaluator = hoc_ev.hoc_evaluator(pool, args.n_stims, args.n_sfs, args.sf_module, logger)
     seed = os.getenv('BLUEPYOPT_SEED', args.seed)
     opt = bpop.optimisations.DEAPOptimisation(
         evaluator=evaluator,
@@ -186,7 +219,7 @@ def main(pool):
         print ('Best individuals: ', best_indvs, '\n')
 if __name__ == '__main__':
     import multiprocessing as mp
-    pool = mp.Pool(100)
+    pool = mp.Pool(10)
     import subprocess
     if global_rank == 0:
         p = subprocess.Popen(["sh","watch_gpu_util.sh"])#subprocess.Popen(["python", "/gpfs/alpine/scratch/zladd/nro106/axonproj/benchmarking/GPU_genetic_alg/python/monitor_gpu.py"])
@@ -194,8 +227,9 @@ if __name__ == '__main__':
     prof = cProfile.Profile()
     retval = prof.runcall(main, pool)
     prof.dump_stats(datafn)
-#     main(pool)
-    if global_rank == 0:
-        p.kill()
-        kill(p.pid)
-    logging.info("absolute end : " + str(time.time()))
+# #     main(pool)
+#     if global_rank == 0:
+#         p.kill()
+#         kill(p.pid)
+    if global_rank == 1:
+        logger.info("absolute end : " + str(time.time()))

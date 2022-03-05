@@ -10,7 +10,7 @@ import os
 from mpi4py import MPI
 # set up environment variables for MPI
 comm = MPI.COMM_WORLD
-global_rank = comm.Get_rank()
+global_rank = comm.Get_rank() // 8
 size = comm.Get_size()
 
 # DEFINE

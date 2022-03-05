@@ -2,21 +2,31 @@
 
 
 if [[ $1 == '' ]]; then
-    echo no args using strong_benchmark_plan_sf.txt
-    source ./strong_benchmark_plan_sf.txt
+    echo no benchmarking plan supplied!
+    exit 1
 else
     source ./${1}
+    echo "LAUNCHING ${1}" >> launch_log.log
 fi
+
+if [[ $2 != '' ]];  then
+    JOBID="$2"
+    echo "Launch JOB: $JOBID" >> launch_log.log
+else
+    sh waiter.sh
+fi
+
 IFS=',' read -r -a cpuArray <<< "$cpuTrials"
 IFS=',' read -r -a offspringArray <<< "$offspring"
 IFS=',' read -r -a nodeArray <<< "$N"
 IFS=',' read -r -a n_stims <<< "$n_stims"
 IFS=',' read -r -a n_sfs <<< "$n_sfs"
 
-echo "Clearing Logs..."
+echo "Clearing Logs..." >> launch_log.log
 rm logs/*
 
-LSB_JOB_REPORT_MAIL=N
+
+
 
 if [ "${#offspringArray[@]}" -eq "${#nodeArray[@]}" ] \
 && [ "${#offspringArray[@]}" -eq "${#n_stims[@]}" ] \
@@ -26,33 +36,59 @@ if [ "${#offspringArray[@]}" -eq "${#nodeArray[@]}" ] \
         n_sf="${n_sfs[i]}"
         n_stim="${n_stims[i]}"
         nnodes="${nodeArray[i]}"
-        offspring_trial="${offspringArray[i]}"
-        # wait until debug queue is clear
-        num_running=`bjobs | wc -l`
-        until [ $num_running -lt  1 ]
-        do
-          echo "sleeping for a min"
-          sleep 60
-          num_running=`bjobs | wc -l`
-        done
+        offspring_trial="${offspringArray[i]}"       
         # launch job
-        echo launching @ "$cpu_trial" cpus and "$offspring_trial" offspring and "$nnodes" nodes from `pwd` \
-         with $n_stim stims and $n_sf sfs
-        if [ -z "$JOBID" ] # no dependency
-        then
-              name=gen_alg
-              logpath=logs/${nnodes}N${cpu_trial}C${offspring_trial}O.log
-              JOBID=$(bsub -nnodes $nnodes -W 30 -P nro106 -alloc_flags "smt4 nvme" -J gen_alg -q debug  -wa 'USR1' -wt '1'  -o $logpath "sh batch_run_cl.sh $cpu_trial $offspring_trial $n_stim $n_sf" | awk '/is submitted/{print substr($2, 2, length($2)-2);}')
-        else # dependency
-             logpath=logs/${nnodes}N${cpu_trial}C${offspring_trial}O.log
-             echo Dependcy: $JOBID
-             JOBID=$(bsub -nnodes $nnodes -W 30 -P nro106 -w  "done($JOBID)" -alloc_flags "smt4 nvme" -J gen_alg -q debug -wa 'USR1' -wt '1'  -o $logpath "sh batch_run_cl.sh $cpu_trial $offspring_trial $n_stim $n_sf" | awk '/is submitted/{print substr($2, 2, length($2)-2);}')
+        num_running=`squeue -u zladd | wc -l`
+        while [ $num_running -gt 50 ]
+        do
+            echo "Thresholding number of active jobs to 50"
+            sleep 60
+            num_running=`squeue -u zladd | wc -l`
+        done
+        
+        FILE=python/outputs/${nnodes}N_${cpu_trial}C_${offspring_trial}O_${n_stim}S_${n_sf}SF*
+
+        if ls $FILE 1> /dev/null 2>&1 && [ "$novel" == 'True' ]; then
+            echo "python/outputs/${nnodes}N_${cpu_trial}C_${offspring_trial}O_${n_stim}S_${n_sf}SF exists! continuing"  >> launch_log.log
+            # deletes any trials with that name
+            if [ "$delete" == 'True' ]; then
+                echo deleting it ...  >> launch_log.log
+                rm -r python/trash_outputs/${nnodes}N_${cpu_trial}C_${offspring_trial}O_${n_stim}S_${n_sf}SF*
+                mv $FILE python/trash_outputs
+            else 
+                continue # you are in novel mode, but you don't want to delete
+            fi
+        else
+            echo "novel trial" >> launch_log.log
         fi
+        
+        if [ $nnodes -gt 17 ]; then
+            echo "${nnodes} is too many nodes, skipping..."
+            continue
+        fi
+
+        echo launching @ "$cpu_trial" cpus and "$offspring_trial" offspring and "$nnodes" nodes from `pwd` \
+         with $n_stim stims and $n_sf sfs >> launch_log.log
+        if [ -z "$JOBID" ] # no dependency
+            then
+              name=gen_alg
+              logpath=slurm/${nnodes}N${cpu_trial}C${offspring_trial}O.out
+              jid=$(sbatch  --nodes=${nnodes}  --ntasks-per-node 8 -c 10  --output ${logpath} batch_run_cl_cori.sh ${cpu_trial} ${offspring_trial} ${n_stim} ${n_sf}) 
+              JOBID=$(echo $jid | sed 's/[^0-9]*//g')
+            else # dependency
+             logpath=slurm/${nnodes}N${cpu_trial}C${offspring_trial}O.out
+             jid=$(sbatch --dependency=afterok:$JOBID  --nodes=${nnodes}  --ntasks-per-node 8  -c 10 --output ${logpath} batch_run_cl_cori.sh ${cpu_trial} ${offspring_trial}  ${n_stim} ${n_sf} ) # 2 nodes x 8 gpus
+              # multiple jobs can depend on a single job
+             JOBID=$(echo $jid | sed 's/[^0-9]*//g')
+        fi
+        echo JOB ID is : $JOBID
     done
 else
     echo weak benchmark plan requires nnodes and offspring size to be same length
+    exit 1
 fi
+
+echo "FINAL JOB ID is : $JOBID"
 exit 0
 
 
-# bsub -nnodes 1  -W 5 -P nro106  -q debug  -Ep "sh test_post_exec.sh" "sh sleep.sh"

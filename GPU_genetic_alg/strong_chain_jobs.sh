@@ -32,14 +32,18 @@ for nnodes in "${nodeArray[@]}"
             echo launching @ "$cpu_trial" cpus and "$offspring_trial" offspring and "$nnodes" nodes from `pwd`
             if [ -z "$JOBID" ] # no dependency
             then
-                  name=gen_alg
-                  logpath=logs/${nnodes}N${cpu_trial}C${offspring_trial}O.log
-                  JOBID=$(bsub -nnodes $nnodes -W 30 -P nro106 -alloc_flags "smt4 nvme" -J gen_alg -q debug  -Ep "sh post_exec.sh $cpu_trial ${nnodes} $offspring_trial" -o $logpath "sh batch_run_cl.sh $cpu_trial $offspring_trial" | awk '/is submitted/{print substr($2, 2, length($2)-2);}')
+              name=gen_alg
+              logpath=slurm/${nnodes}N${cpu_trial}C${offspring_trial}O.out
+              jid=$(sbatch  --nodes=${nnodes}  --output ${logpath} batch_run_cl_cori.sh ${offspring_trial} ${n_stim} ${n_sf}) 
+              JOBID=$(echo $jid | sed 's/[^0-9]*//g')
             else # dependency
-                 logpath=logs/${nnodes}N${cpu_trial}C${offspring_trial}O.log
-                 echo Dependcy: $JOBID
-                 JOBID=$(bsub -nnodes $nnodes -W 30 -P nro106 -w  "done($JOBID)" -alloc_flags "smt4 nvme" -J gen_alg -q debug -Ep "sh post_exec.sh $cpus ${nnodes} $offspring_size"  -o $logpath "sh batch_run_cl.sh $cpu_trial $offspring_trial" | awk '/is submitted/{print substr($2, 2, length($2)-2);}')
+             logpath=slurm/${nnodes}N${cpu_trial}C${offspring_trial}O.out
+              jid=$(sbatch --dependency=afterany:$JOBID  --nodes=${nnodes} --output ${logpath} batch_run_cl_cori.sh ${offspring_trial}  ${n_stim} ${n_sf} ) # 2 nodes x 8 gpus
+              # multiple jobs can depend on a single job
+              JOBID=$(echo $jid | sed 's/[^0-9]*//g')
             fi
+            
+            echo job id is $JOBID 
 
 
         done

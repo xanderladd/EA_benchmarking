@@ -5,7 +5,9 @@ import efel
 import time as timer
 import os
 import copy
+
 import logging
+
 import pickle 
 import utils
 import re
@@ -22,11 +24,30 @@ import sys
 # import pprint
 from mpi4py import MPI
 import cProfile
+import copy
 from scipy.signal import argrelextrema
+import ipfx.feature_extractor as ipfx_feat #SpikeTrainFeatureExtractor
+# import logging.config
+# logging.config.dictConfig({
+# 'version': 1,
+# 'disable_existing_loggers': True})
+
+logging.getLogger("ipfx").setLevel(logging.WARNING)
+logging.getLogger("ipfx.feature_extractor").setLevel(logging.WARNING)
+logging.getLogger("ipfx_feat").setLevel(logging.WARNING)
+
+import warnings
+warnings.filterwarnings("ignore")
+
 
 comm = MPI.COMM_WORLD
-global_rank = comm.Get_rank()
 size = comm.Get_size()
+nGpus = min(8,len([devicenum for devicenum in os.environ['CUDA_VISIBLE_DEVICES'] if devicenum != ","]))
+
+total_rank = comm.Get_rank()
+global_rank = comm.Get_rank() // nGpus
+local_rank = comm.Get_rank() % nGpus
+total_size = comm.Get_size()
 
 #from concurrent.futures import ThreadPoolExecutor as Pool#
 #multiprocessing.set_start_method('fork')
@@ -550,7 +571,7 @@ def eval_function(target, data, function, dt):
     scorestart = timer.time()
    
 
-    logging.info("process {} is computing at {}".format(os.getpid(), scorestart))
+    #logging.info("process {} is computing at {}".format(os.getpid(), scorestart))
     num_indvs = data.shape[0]
     if function in custom_score_functions:
         score = [getattr(thismodule, function)(target, data[indv,:], dt) for indv in range(num_indvs)]
@@ -599,6 +620,7 @@ def eval_stim_sf_pair(args):
     if type(args)== dict:
         args = [args]
     for arg in args:
+        logger = arg['logger']
         i = arg["i"]
         j = arg["j"]
         #time = arg['start']
@@ -606,8 +628,8 @@ def eval_stim_sf_pair(args):
         curr_sf = arg["curr_sf"]
         curr_data_volt =arg["curr_data_volt"]
         curr_target_volt =arg["curr_target_volt"]
-        #if global_rank != 10:
-        logging.info("process {} is {} and started at {}".format(os.getpid(), curr_sf, timer.time()))
+        if total_rank == 0:
+            logger.info("process {} is {} and started at {}".format(os.getpid(), curr_sf, timer.time()))
         io_start = timer.time()
 #         f =h5py.File("../Data/tmp/{}.hdf5".format(global_rank),"r")
 #         curr_data_volt =f["data_volt{}{}".format(i,j)][:]
@@ -626,7 +648,7 @@ def eval_stim_sf_pair(args):
             strt = timer.time()
             curr_scores = eval_function(curr_target_volt, curr_data_volt, curr_sf, dt)
             endd = timer.time()
-            #print(endd - strt, ": proc took", os.getpid(),  " was  :", curr_sf)
+#             print(endd - strt, ": proc took", os.getpid(),  " was  :", curr_sf, 'dvolt shape :', curr_data_volt.shape)
 
         norm_scores = normalize_scores(curr_scores, transformation)
 #         for k in range(len(norm_scores)):
@@ -634,7 +656,8 @@ def eval_stim_sf_pair(args):
 #                 norm_scores[k] = 1
 
         computation_time_end = timer.time()
-        logging.info("process {} returning at {}".format(os.getpid(), timer.time()))
+        if total_rank == 0:
+            logger.info("process {} returning at {}".format(os.getpid(), timer.time()))
         final_score += norm_scores * curr_weight 
     return final_score
 
@@ -647,9 +670,9 @@ def wrap_para(arg):
     return retval
 
     
-def callPara(p,args):
+def callPara(p,args, logger):
     # using either nCpus  or 20 
-    logging.info("************ launched PIDS at {} ************".format(timer.time()))
+    logger.info("************ launched PIDS at {} ************".format(timer.time()))
     
     # exit here to avoid bug
     #exit()
@@ -659,17 +682,81 @@ def callPara(p,args):
     end = timer.time()
     print(end-start)
 
-#    res = map(eval_stim_sf_pair,args)
-#     print("ojIBIBIBIBPBPIBNIBIJNJI JNJNJINPINPINIJPN")
-#     with mp.Manager() as manager:
-#             d = manager.dict()
-#             with manager.Pool() as pool:
-#                 pool.map(f, repeat(d, 10))
-#             pprint.pprint(dict(d))
-#     Parallel(n_jobs=nCpus, max_nbytes='50K',mmap_mode='r', prefer='processes')(delayed(eval_stim_sf_pair)(arg) for arg in args)
 
-    logging.info("************ finished PIDS at {} ************".format(timer.time()))
+
+    logger.info("************ finished PIDS at {} ************".format(timer.time()))
     return res
+
+
+def callParaIpfx(p,args,logger):
+    # using either nCpus  or 20 
+    logger.info("************ launched PIDS at {} ************".format(timer.time()))
+    
+    # exit here to avoid bug
+    #exit()
+#     with Pool(35) as p:
+    start = timer.time()
+    real_args = []
+    unique_stims = []
+    for arg in args:
+        for i in range(len(arg['curr_data_volt'])):
+            curr_arg = {}
+            for key in arg:
+                curr_arg[key] = arg[key]
+            
+            curr_arg['curr_data_volt'] = curr_arg['curr_data_volt'][i,:]
+            real_args.append(curr_arg)
+            unique_stims.append(curr_arg['i'])
+    num_unique_stims = len(np.unique(np.array(unique_stims)))
+    res = p.map(eval_ipfx,real_args)
+    res = np.array(res).reshape(-1, num_unique_stims)
+    end = timer.time()
+    print(end-start)
+
+
+
+    logger.info("************ finished PIDS at {} ************".format(timer.time()))
+    return np.array(res)
+
+def clean_flatten_score(score):
+    if len(list(score.keys())) == 1:
+        return 100000
+    else:
+        total = 0
+        for key in score.keys():
+            if np.isnan(score[key]):
+                continue
+            total += score[key]
+    return total
+                
+
+def eval_ipfx(arg):
+    target = arg['curr_target_volt']
+    data =  arg['curr_data_volt']
+    curr_stim = arg['curr_stim']
+    dt=0.02
+    index=None
+    time_stamps =  10000
+    time = np.cumsum([dt for i in range(time_stamps)])
+        
+    time = time / 1000
+    ext = ipfx_feat.SpikeFeatureExtractor(start=.00002, end=.2)
+#     import pdb; pdb.set_trace()
+#     simVolts = nrnMread("./VHotP9.dat")
+    start = timer.time()
+    try:
+        spikes = ext.process(time, data, curr_stim)
+        ext = ipfx_feat.SpikeTrainFeatureExtractor(start=.00002, end=.2)
+        features = ext.process(time, data, curr_stim, spikes) # re-using spikes from above
+
+    except Exception as e:
+        features = {'adapt':0.000004}
+        print(e)
+    end = timer.time()
+    return clean_flatten_score(features)
+    
+    
+    
 
 def eval_efel(feature_name, target, data, dt=0.02, stims=None, index=None):
     def diff_lists(lis1, lis2):
@@ -695,6 +782,7 @@ def eval_efel(feature_name, target, data, dt=0.02, stims=None, index=None):
     curr_trace_target['stim_end'] = [stim_end]
     traces = [curr_trace_target]
     #testing
+    # print(len(data))
     for i in range(len(data)):
         curr_trace_data = {}
         curr_trace_data['T'] = time
@@ -711,7 +799,7 @@ def eval_efel(feature_name, target, data, dt=0.02, stims=None, index=None):
     efelstart = timer.time()
     #with Pool(2) as p2:
     traces_results = efel.getFeatureValues(traces, [feature_name], parallel_map=map, raise_warnings=False)
-    #print("EFEL eval took: ", timer.time()-efelstart)
+    # print("EFEL eval took: ", timer.time()-efelstart)
     diff_features = []
     for i in range(len(data)): #testing
         diff_features.append(diff_lists(traces_results[0][feature_name], traces_results[i+1][feature_name]))

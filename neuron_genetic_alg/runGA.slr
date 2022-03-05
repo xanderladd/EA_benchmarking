@@ -26,18 +26,16 @@ nrnivmodl
 cd ../../
 ipcontroller --init --ip='*' --sqlitedb --ping=30000 --profile=${IPYTHON_PROFILE} &
 sleep 600
-srun -n 640 ipengine --timeout=3000 --profile=${IPYTHON_PROFILE} &
+srun -n 200 ipengine --timeout=3000 --profile=${IPYTHON_PROFILE} &
 sleep 600
 CHECKPOINTS_DIR="checkpoints"
 mkdir -p ${CHECKPOINTS_DIR}
 python optimize_parameters_genetic_alg.py \
     -vv                                \
     --compile                          \
-    --offspring_size=${OFFSPRING_SIZE} \
-    --max_ngen=${MAX_NGEN}             \
-    --seed=${seed}                     \
-    --ipyparallel                      \
-    --start
+    --offspring_size=3                 \
+    --max_ngen=2                       \
+    --ipyparallel                      
 # If job finishes in time analyze result
 #mv ${CHECKPOINTS_DIR}/seed${seed}.pkl checkpoints_final/
 # check if the job with 4th seed is finished

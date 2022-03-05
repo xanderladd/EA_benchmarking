@@ -31,11 +31,16 @@ class AnchoredScaleBar(AnchoredOffsetbox):
 
         if sizex and labelx:
             self.xlabel = TextArea(labelx, minimumdescent=False)
-            bars = VPacker(children=[bars, self.xlabel], align="center", pad=0, sep=sep)
+            bars = VPacker(children=[bars, self.xlabel], align="right", pad=pad, sep=sep)
         if sizey and labely:
             self.ylabel = TextArea(labely)
-            bars = HPacker(children=[self.ylabel, bars], align="center", pad=0, sep=sep)
-
+            if 'y_sep' in kwargs:
+                y_sep = kwargs['y_sep']
+                del kwargs['y_sep']
+            else:
+                y_sep = sep
+            bars = HPacker(children=[self.ylabel, bars], align="center", pad=pad, sep=y_sep)
+            
         AnchoredOffsetbox.__init__(self, loc, pad=pad, borderpad=borderpad,
                                    child=bars, prop=prop, frameon=False, **kwargs)
 
@@ -57,11 +62,18 @@ def add_scalebar(ax, matchx=True, matchy=True, hidex=True, hidey=True, **kwargs)
     
     if matchx:
         kwargs['sizex'] = f(ax.xaxis)
+    if 'labelx' in kwargs:
+        kwargs['labelx'] = str(kwargs['sizex']) + kwargs['labelx'] 
+    else:
         kwargs['labelx'] = str(kwargs['sizex'])
+        
     if matchy:
         kwargs['sizey'] = f(ax.yaxis)
+    if 'labely' in kwargs:
+        kwargs['labely'] = "%.2f" % kwargs['sizey'] + kwargs['labely'] 
+    else:
         kwargs['labely'] = str(kwargs['sizey'])
-        
+
     sb = AnchoredScaleBar(ax.transData, **kwargs)
     ax.add_artist(sb)
 

@@ -5,3 +5,11 @@
 *.dat
 *.csv
 *.hdf5
+*.log
+*.png
+*/.ipynb_checkpoints/*
+#*/__pycache__/*
+*/*outputs*/*
+*
+!*.py
+
