@@ -81,7 +81,7 @@ ndx-events==0.2.0
 neo==0.10.0
 nest-asyncio==1.2.0
 networkx==2.6.2
-NEURON==7.6
+NEURON
 noisyopt==0.2.2
 notebook==6.2.0
 numexpr==2.7.3
