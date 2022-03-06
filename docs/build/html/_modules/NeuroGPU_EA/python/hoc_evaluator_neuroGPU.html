@@ -1,0 +1,682 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NeuroGPU_EA.python.hoc_evaluator_neuroGPU &#8212; EA_benchmarking 1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for NeuroGPU_EA.python.hoc_evaluator_neuroGPU</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">import</span> <span class="nn">bluepyopt</span> <span class="k">as</span> <span class="nn">bpop</span>
+<span class="kn">import</span> <span class="nn">nrnUtils</span>
+<span class="kn">import</span> <span class="nn">score_functions</span> <span class="k">as</span> <span class="nn">sf</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">struct</span>
+<span class="kn">from</span> <span class="nn">extractModel_mappings</span> <span class="kn">import</span> <span class="n">allparams_from_mapping</span>
+<span class="kn">import</span> <span class="nn">bluepyopt.deapext.algorithms</span> <span class="k">as</span> <span class="nn">algo</span>
+<span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">csv</span>
+<span class="c1">#import ap_tuner as tuner</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span>
+<span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">GPUtil</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">StringIO</span>
+
+<span class="c1">#os.environ[&quot;OMP_NUM_THREADS&quot;] = &quot;1&quot; # export OMP_NUM_THREADS=4</span>
+<span class="c1">#os.environ[&quot;OPENBLAS_NUM_THREADS&quot;] = &quot;1&quot; # export OPENBLAS_NUM_THREADS=4</span>
+<span class="c1">#os.environ[&quot;MPICH_GNI_FORK_MODE&quot;] = &quot;FULLCOPY&quot; # export MPICH_GNI_FORK_MODE=FULLCOPY</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">config.allen_config</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nGpus</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="nb">len</span><span class="p">([</span><span class="n">devicenum</span> <span class="k">for</span> <span class="n">devicenum</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;CUDA_VISIBLE_DEVICES&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">devicenum</span> <span class="o">!=</span> <span class="s2">&quot;,&quot;</span><span class="p">]))</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;NO GPUS FOUND&#39;</span><span class="p">)</span>
+    <span class="n">nGpus</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="n">old_eval</span> <span class="o">=</span> <span class="n">algo</span><span class="o">.</span><span class="n">_evaluate_invalid_fitness</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;USING nGPUS: &quot;</span><span class="p">,</span> <span class="n">nGpus</span><span class="p">)</span>
+<span class="n">custom_score_functions</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="s1">&#39;chi_square_normal&#39;</span><span class="p">,</span>\
+                    <span class="s1">&#39;traj_score_1&#39;</span><span class="p">,</span>\
+                    <span class="s1">&#39;traj_score_2&#39;</span><span class="p">,</span>\
+                    <span class="s1">&#39;traj_score_3&#39;</span><span class="p">,</span>\
+                    <span class="s1">&#39;isi&#39;</span><span class="p">,</span>\
+                    <span class="s1">&#39;rev_dot_product&#39;</span><span class="p">,</span>\
+                    <span class="s1">&#39;KL_divergence&#39;</span><span class="p">]</span>
+
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">cpu_str</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;SLURM_JOB_CPUS_PER_NODE&#39;</span><span class="p">]</span>
+    <span class="n">SLURM_CPUS</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\d+&#39;</span><span class="p">,</span> <span class="n">cpu_str</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">()</span> <span class="p">)</span>
+    <span class="n">nCpus</span> <span class="o">=</span>  <span class="n">SLURM_CPUS</span><span class="c1">#multiprocessing.cpu_count()</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;using nCpus: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">nCpus</span><span class="p">))</span>
+
+<span class="k">except</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;not logging cpus&#39;</span><span class="p">)</span>
+
+
+<span class="c1"># Number of timesteps for the output volt.</span>
+<span class="n">ntimestep</span> <span class="o">=</span> <span class="mi">10000</span>
+<span class="n">comm</span> <span class="o">=</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
+<span class="n">size</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">Get_size</span><span class="p">()</span>
+<span class="n">total_rank</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">Get_rank</span><span class="p">()</span>
+<span class="n">global_rank</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">Get_rank</span><span class="p">()</span> <span class="o">//</span> <span class="n">nGpus</span>
+<span class="n">local_rank</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">Get_rank</span><span class="p">()</span> <span class="o">%</span> <span class="n">nGpus</span>
+<span class="n">total_size</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">Get_size</span><span class="p">()</span>
+<span class="n">global_size</span> <span class="o">=</span> <span class="n">size</span> <span class="o">//</span> <span class="n">nGpus</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;size: </span><span class="si">{</span><span class="n">size</span><span class="si">}</span><span class="s1">, totl rnk: </span><span class="si">{</span><span class="n">total_rank</span><span class="si">}</span><span class="s1">, glbl rnk: </span><span class="si">{</span><span class="n">global_rank</span><span class="si">}</span><span class="s1">, lcl rnk: </span><span class="si">{</span><span class="n">local_rank</span><span class="si">}</span><span class="s1">, tlt size: </span><span class="si">{</span><span class="n">total_size</span><span class="si">}</span><span class="s1">, glb size: </span><span class="si">{</span><span class="n">global_size</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+<span class="c1">#print(&quot;Process is eligibl to run on:&quot;, affinity, &quot;g rank &quot;, global_rank, &quot;len aff:&quot;, len(affinity))</span>
+<span class="c1">#print(1/0)</span>
+
+<span class="k">def</span> <span class="nf">divide_params</span><span class="p">(</span><span class="n">param_values</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">rank</span><span class="p">):</span>
+    <span class="n">myChunk</span> <span class="o">=</span> <span class="p">[(</span><span class="nb">len</span><span class="p">(</span><span class="n">param_values</span><span class="p">)</span> <span class="o">//</span> <span class="n">size</span><span class="p">)</span> <span class="o">*</span> <span class="n">rank</span> <span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">param_values</span><span class="p">)</span> <span class="o">//</span> <span class="n">size</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">rank</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+    <span class="c1"># this is a bit hacky, just tacks on last ind if we need to because the split isn&#39;t great</span>
+    <span class="c1"># cleaning</span>
+    <span class="k">if</span> <span class="n">rank</span> <span class="o">==</span> <span class="n">size</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">myChunk</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">param_values</span><span class="p">)</span>
+
+    <span class="n">myChunk</span> <span class="o">=</span> <span class="p">(</span><span class="n">myChunk</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">myChunk</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">param_values</span> <span class="o">=</span> <span class="n">param_values</span><span class="p">[</span><span class="n">myChunk</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">myChunk</span><span class="p">[</span><span class="mi">1</span><span class="p">],:]</span>
+    <span class="c1"># revisit use of this var when you clean</span>
+    <span class="n">my_indvs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">myChunk</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">myChunk</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">param_values</span><span class="p">,</span> <span class="n">my_indvs</span>
+            
+<span class="k">def</span> <span class="nf">nrnMread</span><span class="p">(</span><span class="n">fileName</span><span class="p">):</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span>
+    <span class="n">nparam</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">typeFlg</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">nrnMreadH5</span><span class="p">(</span><span class="n">fileName</span><span class="p">):</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">dat</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;Data&#39;</span><span class="p">][:][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dat</span><span class="p">)</span>
+
+<div class="viewcode-block" id="hoc_evaluator"><a class="viewcode-back" href="../../../NeuroGPU-EA.html#NeuroGPU_EA.python.hoc_evaluator_neuroGPU.hoc_evaluator">[docs]</a><span class="k">class</span> <span class="nc">hoc_evaluator</span><span class="p">(</span><span class="n">bpop</span><span class="o">.</span><span class="n">evaluators</span><span class="o">.</span><span class="n">Evaluator</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pool</span><span class="p">,</span> <span class="n">n_stims</span><span class="p">,</span> <span class="n">n_sfs</span><span class="p">,</span> <span class="n">sf_module</span><span class="o">=</span><span class="s1">&#39;efel&#39;</span><span class="p">,</span><span class="n">logger</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructor&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pool</span> <span class="o">=</span> <span class="n">pool</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_stims</span> <span class="o">=</span> <span class="n">n_stims</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_sfs</span> <span class="o">=</span> <span class="n">n_sfs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sf_module</span> <span class="o">=</span> <span class="n">sf_module</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logger</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">nrnUtils</span><span class="o">.</span><span class="n">readParamsCSV</span><span class="p">(</span><span class="n">paramsCSV</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">hoc_evaluator</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orig_params</span> <span class="o">=</span> <span class="n">orig_params</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">opt_ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">params_opt_ind</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt_ind</span><span class="p">])</span>
+        <span class="n">realData</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">readParamsCSV</span><span class="p">(</span><span class="n">templateCSV</span><span class="p">)</span>
+        <span class="n">realOrig</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">realData</span><span class="p">)[:,</span><span class="mi">1</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orig_params</span> <span class="o">=</span> <span class="n">orig_params</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pmin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">data</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pmax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">data</span><span class="p">[:,</span><span class="mi">3</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="c1"># make this a function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fixed</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">param_idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">orig_params</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">param_idx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt_ind</span><span class="p">:</span>
+                <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opt_ind</span> <span class="o">==</span> <span class="n">param_idx</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">orig_params</span><span class="p">[</span><span class="n">param_idx</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">pmin</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span><span class="n">rtol</span><span class="o">=.</span><span class="mi">000001</span><span class="p">)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pmin</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">pmax</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span><span class="n">rtol</span><span class="o">=.</span><span class="mi">000001</span><span class="p">):</span>
+                    <span class="c1">#self.fixed[param_idx] = self.orig_params[param_idx]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bpop</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">orig_params</span><span class="p">[</span><span class="n">param_idx</span><span class="p">],</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pmin</span><span class="p">[</span><span class="n">idx</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">*.</span><span class="mi">999999</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">pmax</span><span class="p">[</span><span class="n">idx</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mf">1.00001</span><span class="p">)))</span>
+                    <span class="n">counter</span>  <span class="o">+=</span><span class="mi">1</span> 
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">counter</span> <span class="o">+=</span><span class="mi">1</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bpop</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">orig_params</span><span class="p">[</span><span class="n">param_idx</span><span class="p">],</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pmin</span><span class="p">[</span><span class="n">idx</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">pmax</span><span class="p">[</span><span class="n">idx</span><span class="p">][</span><span class="mi">0</span><span class="p">])))</span> <span class="c1"># this indexing is annoying... pmax and pmin weird shape because they are numpy arrays, see idx assignment on line 125... how can this be more clear</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1">#self.fixed[param_idx] = self.orig_params[param_idx]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bpop</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="mf">66.56</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span><span class="mi">90</span><span class="p">)))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="n">opt_weight_list</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">opt_stim_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">opt_stim_name_list</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">8</span> <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objectives</span> <span class="o">=</span> <span class="p">[</span><span class="n">bpop</span><span class="o">.</span><span class="n">objectives</span><span class="o">.</span><span class="n">Objective</span><span class="p">(</span><span class="s1">&#39;Weighted score functions&#39;</span><span class="p">)]</span>
+<span class="c1">#         if global_rank == 0:</span>
+<span class="c1">#             #io_start = time.time()</span>
+<span class="c1">#             #self.target_volts_list = self.make_target_volts(realOrig, self.opt_stim_list)</span>
+<span class="c1">#             #io_end = time.time()</span>
+<span class="c1">#             #logging.info(&quot;IO:: &quot; + str(io_end - io_start))</span>
+<span class="c1">#             self.target_volts_list = [target_volts_hdf5[s][:] for s in self.opt_stim_list]#np.genfromtxt(&quot;targetVolts.csv&quot;, delimiter=&quot;,&quot;)#self.make_target_volts(realOrig, self.opt_stim_list)</span>
+<span class="c1">#             #realOrig[1] = -72</span>
+<span class="c1">#             #self.make_target_volts(realOrig, self.opt_stim_list)</span>
+<span class="c1">#         else:</span>
+<span class="c1">#             self.target_volts_list = None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_volts_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">target_volts_hdf5</span><span class="p">[</span><span class="n">s</span><span class="p">][:]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt_stim_list</span><span class="p">]</span>
+        <span class="c1">#self.target_volts_list = comm.bcast(self.target_volts_list, root=0)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">dts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_gen</span> <span class="o">=</span> <span class="mi">0</span>
+        
+    <span class="k">def</span> <span class="nf">make_target_volts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">orig_params</span><span class="p">,</span> <span class="n">opt_stim_list</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">convert_allen_data</span><span class="p">(</span><span class="n">opt_stim_name_list</span><span class="p">,</span> <span class="n">stim_file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dts</span><span class="p">)</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">orig_params</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+        <span class="c1">#params = np.repeat(params, 5 ,axis=0)</span>
+        <span class="n">data_volts_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+        <span class="n">allparams</span> <span class="o">=</span> <span class="n">allparams_from_mapping</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">params</span><span class="p">))</span> 
+        <span class="k">for</span> <span class="n">stimset</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">opt_stim_list</span><span class="p">),</span> <span class="n">nGpus</span><span class="p">):</span>
+            <span class="n">p_objects</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">gpuId</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nGpus</span><span class="p">):</span> 
+                <span class="k">if</span>  <span class="p">(</span><span class="n">gpuId</span> <span class="o">+</span> <span class="n">stimset</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">opt_stim_list</span><span class="p">):</span>
+                    <span class="k">break</span>
+                <span class="k">if</span> <span class="n">stimset</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Swapping &quot;</span><span class="p">,</span> <span class="n">gpuId</span><span class="p">,</span> <span class="n">gpuId</span> <span class="o">+</span> <span class="n">stimset</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">global_rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">stim_swap</span><span class="p">(</span><span class="n">gpuId</span><span class="p">,</span> <span class="n">gpuId</span> <span class="o">+</span> <span class="n">stimset</span><span class="p">)</span>
+                <span class="n">p_objects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">run_model</span><span class="p">(</span><span class="n">gpuId</span><span class="p">,</span> <span class="p">[]))</span>
+            <span class="k">for</span> <span class="n">gpuId</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nGpus</span><span class="p">):</span>
+                <span class="k">if</span>  <span class="p">(</span><span class="n">gpuId</span> <span class="o">+</span> <span class="n">stimset</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">opt_stim_list</span><span class="p">):</span>
+                    <span class="k">break</span> 
+                <span class="n">p_objects</span><span class="p">[</span><span class="n">gpuId</span><span class="p">]</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_volts_list</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">data_volts_list</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getVolts</span><span class="p">(</span><span class="n">gpuId</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">data_volts_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data_volts_list</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">getVolts</span><span class="p">(</span><span class="n">gpuId</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">data_volts_list</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="s2">&quot;targetVoltsGPUNew2.csv&quot;</span><span class="p">,</span> <span class="n">data_volts_list</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">data_volts_list</span>
+
+        
+
+<div class="viewcode-block" id="hoc_evaluator.my_evaluate_invalid_fitness"><a class="viewcode-back" href="../../../NeuroGPU-EA.html#NeuroGPU_EA.python.hoc_evaluator_neuroGPU.hoc_evaluator.my_evaluate_invalid_fitness">[docs]</a>    <span class="k">def</span> <span class="nf">my_evaluate_invalid_fitness</span><span class="p">(</span><span class="n">toolbox</span><span class="p">,</span> <span class="n">population</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Evaluate the individuals with an invalid fitness</span>
+<span class="sd">        Returns the count of individuals with invalid fitness</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">invalid_ind</span> <span class="o">=</span> <span class="p">[</span><span class="n">ind</span> <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">population</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">ind</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">valid</span><span class="p">]</span>
+        <span class="n">invalid_ind</span> <span class="o">=</span> <span class="p">[</span><span class="n">population</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">+</span> <span class="n">invalid_ind</span> 
+        <span class="n">fitnesses</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">invalid_ind</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">fit</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">invalid_ind</span><span class="p">,</span> <span class="n">fitnesses</span><span class="p">):</span>
+            <span class="n">ind</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="n">fit</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">invalid_ind</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="hoc_evaluator.old_top_SFs"><a class="viewcode-back" href="../../../NeuroGPU-EA.html#NeuroGPU_EA.python.hoc_evaluator_neuroGPU.hoc_evaluator.old_top_SFs">[docs]</a>    <span class="k">def</span> <span class="nf">old_top_SFs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">run_num</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        finds scoring functions w/ weight over 50 and pairs them with that stim and sends</span>
+<span class="sd">        them to mapping function so that we will run so many processes</span>
+<span class="sd">        Arguments</span>
+<span class="sd">        --------------------------------------------------------------</span>
+<span class="sd">        run_num: the number of times neuroGPU has ran for 8 stims,</span>
+<span class="sd">        keep track of what stims we are picking out score functions for</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">all_pairs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">last_stim</span> <span class="o">=</span> <span class="p">(</span><span class="n">run_num</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">nGpus</span> <span class="c1"># ie: 0th run last_stim = (0+1)*8 = 8</span>
+        <span class="n">first_stim</span> <span class="o">=</span> <span class="n">last_stim</span> <span class="o">-</span> <span class="n">nGpus</span> <span class="c1"># on the the last round this will be 24 - 8 = 16</span>
+        <span class="k">if</span> <span class="n">last_stim</span> <span class="o">&gt;</span> <span class="mi">18</span><span class="p">:</span>
+            <span class="n">last_stim</span> <span class="o">=</span> <span class="mi">18</span>
+        <span class="c1">#print(first_stim,last_stim, &quot;first and last&quot;)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">first_stim</span><span class="p">,</span> <span class="n">last_stim</span><span class="p">):</span><span class="c1">#range(first_stim,last_stim):</span>
+            <span class="n">sf_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">score_function_ordered_list</span><span class="p">)</span>
+            <span class="n">curr_weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">[</span><span class="n">sf_len</span><span class="o">*</span><span class="n">i</span><span class="p">:</span> <span class="n">sf_len</span><span class="o">*</span><span class="n">i</span> <span class="o">+</span> <span class="n">sf_len</span><span class="p">]</span> <span class="c1">#get range of sfs for this stim</span>
+           <span class="c1"># TODO make this dynamic to the number of preocessors</span>
+            <span class="n">top_inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">curr_weights</span> <span class="o">&gt;</span> <span class="mi">50</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># weights bigger than 50</span>
+            <span class="n">pairs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">top_inds</span><span class="p">)),</span> <span class="p">[</span><span class="n">ind</span> <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">top_inds</span><span class="p">]))</span> <span class="c1">#zips up indices with corresponding stim # to make sure it is refrencing a relevant stim</span>
+            <span class="n">all_pairs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pairs</span><span class="p">)</span>
+        <span class="n">flat_pairs</span> <span class="o">=</span> <span class="p">[</span><span class="n">pair</span> <span class="k">for</span> <span class="n">pairs</span> <span class="ow">in</span> <span class="n">all_pairs</span> <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">pairs</span><span class="p">]</span> <span class="c1">#flatten the list of tuples</span>
+        <span class="k">return</span> <span class="n">flat_pairs</span></div>
+    
+<div class="viewcode-block" id="hoc_evaluator.top_SFs"><a class="viewcode-back" href="../../../NeuroGPU-EA.html#NeuroGPU_EA.python.hoc_evaluator_neuroGPU.hoc_evaluator.top_SFs">[docs]</a>    <span class="k">def</span> <span class="nf">top_SFs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">run_num</span><span class="p">,</span> <span class="n">max_sfs</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        finds scoring functions w/ weight over 50 and pairs them with that stim and sends</span>
+<span class="sd">        them to mapping function so that we will run so many processes</span>
+<span class="sd">        Arguments</span>
+<span class="sd">        --------------------------------------------------------------</span>
+<span class="sd">        run_num: the number of times neuroGPU has ran for 8 stims,</span>
+<span class="sd">        keep track of what stims we are picking out score functions for</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">all_pairs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">last_stim</span> <span class="o">=</span> <span class="p">(</span><span class="n">run_num</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">nGpus</span> <span class="c1"># ie: 0th run last_stim = (0+1)*8 = 8</span>
+        <span class="n">first_stim</span> <span class="o">=</span> <span class="n">last_stim</span> <span class="o">-</span> <span class="n">nGpus</span> <span class="c1"># on the the last round this will be 24 - 8 = 16</span>
+        <span class="k">if</span> <span class="n">last_stim</span> <span class="o">&gt;</span> <span class="mi">18</span><span class="p">:</span>
+            <span class="n">last_stim</span> <span class="o">=</span> <span class="mi">18</span>
+        <span class="c1">#print(first_stim,last_stim, &quot;first and last&quot;)</span>
+        <span class="n">sf_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">score_function_ordered_list</span><span class="p">)</span>
+        <span class="n">curr_weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">[</span><span class="n">sf_len</span><span class="o">*</span><span class="n">first_stim</span><span class="p">:</span> <span class="n">sf_len</span><span class="o">*</span><span class="n">last_stim</span> <span class="o">+</span> <span class="n">sf_len</span><span class="p">]</span> <span class="c1">#get range of sfs for this stim</span>
+        <span class="n">stim_correspondance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">first_stim</span><span class="p">,</span> <span class="n">last_stim</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">sf_len</span><span class="p">)</span> <span class="c1"># inclusive</span>
+       <span class="c1"># TODO make this dynamic to the number of preocessors</span>
+        <span class="k">if</span> <span class="n">max_sfs</span><span class="p">:</span>
+            <span class="n">top_inds</span> <span class="o">=</span> <span class="n">curr_weights</span><span class="o">.</span><span class="n">argsort</span><span class="p">()[</span><span class="o">-</span><span class="p">(</span><span class="n">max_sfs</span><span class="p">):][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">top_inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">curr_weights</span> <span class="o">&gt;</span> <span class="mi">50</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">all_pairs</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="n">stim_correspondance</span><span class="p">[</span><span class="n">top_inds</span><span class="p">],</span><span class="n">top_inds</span> <span class="o">%</span> <span class="n">sf_len</span><span class="p">)</span> <span class="c1">#zips up indices with corresponding stim # to make sure it is refrencing a relevant stim</span>
+        <span class="c1">#flat_pairs = [pair for pairs in all_pairs for pair in pairs] #flatten the list of tuples</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">all_pairs</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="hoc_evaluator.run_model"><a class="viewcode-back" href="../../../NeuroGPU-EA.html#NeuroGPU_EA.python.hoc_evaluator_neuroGPU.hoc_evaluator.run_model">[docs]</a>    <span class="k">def</span> <span class="nf">run_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">stim_ind</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        -------------------------------------------------------</span>
+<span class="sd">        stim_ind: index to send as arg to neuroGPU </span>
+<span class="sd">        params: DEPRECATED remove</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        ---------------------------------------------------------</span>
+<span class="sd">        p_object: process object that stops when neuroGPU done</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">volts_fn</span> <span class="o">=</span> <span class="n">vs_fn</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">stim_ind</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span>  <span class="nb">str</span><span class="p">(</span><span class="n">global_rank</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.dat&#39;</span>  
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">volts_fn</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;removing &quot;</span><span class="p">,</span> <span class="n">volts_fn</span><span class="p">)</span><span class="c1">#, &quot; from &quot;, global_rank)</span>
+            <span class="c1"># os.remove(volts_fn)</span>
+        <span class="n">p_object</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="s1">&#39;../bin/neuroGPU&#39;</span><span class="p">,</span><span class="nb">str</span><span class="p">(</span><span class="n">stim_ind</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">global_rank</span><span class="p">)],</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">3</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">p_object</span></div>
+    
+
+            
+
+
+<div class="viewcode-block" id="hoc_evaluator.map_par"><a class="viewcode-back" href="../../../NeuroGPU-EA.html#NeuroGPU_EA.python.hoc_evaluator_neuroGPU.hoc_evaluator.map_par">[docs]</a>    <span class="k">def</span> <span class="nf">map_par</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">run_num</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; </span>
+<span class="sd">        This function maps out what stim and score function pairs should be mapped to be evaluated in parallel</span>
+<span class="sd">        first it finds the pairs with the highest weights, the maps them and then adds up the score for each stim</span>
+<span class="sd">        for every individual.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        -------------------- </span>
+<span class="sd">        run_num: the amount of times neuroGPU has ran for 8 stims</span>
+<span class="sd">        </span>
+<span class="sd">        Return</span>
+<span class="sd">        --------------------</span>
+<span class="sd">        2d list of scalar scores for each parameter set w/ shape (nindv,nstims)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">fxnsNStims</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">top_SFs</span><span class="p">(</span><span class="n">run_num</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">n_sfs</span><span class="p">)</span> <span class="c1"># 52 stim-sf combinations (stim#,sf#)</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="c1">#         f = h5py.File(&quot;../Data/tmp/{}.hdf5&quot;.format(global_rank), &quot;w&quot;)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sf_module</span> <span class="o">==</span> <span class="s1">&#39;ipfx&#39;</span><span class="p">:</span>
+            <span class="n">stim_idxs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">combo</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">combo</span> <span class="ow">in</span> <span class="n">fxnsNStims</span><span class="p">]))</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">stim_idxs</span><span class="p">:</span>
+                <span class="n">argDict</span> <span class="o">=</span> <span class="p">{</span>   
+                <span class="s2">&quot;i&quot;</span><span class="p">:</span> <span class="n">i</span><span class="p">,</span>
+<span class="c1">#                 &quot;j&quot;: j,</span>
+                <span class="s2">&quot;curr_data_volt&quot;</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_volts_list</span><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="n">nGpus</span><span class="p">,:,:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span> <span class="c1"># can be really big, like 1000,10000</span>
+                <span class="s2">&quot;curr_target_volt&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_volts_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span> <span class="c1"># 10k</span>
+                <span class="s2">&quot;dt&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">dts</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="c1">#TODO: revisit hacking this</span>
+                <span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">(),</span>
+                <span class="s2">&quot;curr_stim&quot;</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">genfromtxt</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;../Data/Stim_raw</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">.csv&#39;</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+                <span class="p">}</span>
+                <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">argDict</span><span class="p">)</span>
+            <span class="n">scores</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">callParaIpfx</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="p">,</span><span class="n">args</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">scores</span>
+            
+        
+
+        <span class="k">for</span> <span class="n">fxnNStim</span> <span class="ow">in</span> <span class="n">fxnsNStims</span><span class="p">:</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="n">fxnNStim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="n">fxnNStim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="c1">#             f.create_dataset(&quot;data_volt{}{}&quot;.format(i,j), data=self.data_volts_list[i % nGpus,:,:].astype(np.float32))</span>
+<span class="c1">#             f.create_dataset(&quot;target_volt{}{}&quot;.format(i,j), data=self.target_volts_list[i].astype(np.float32))</span>
+            
+            <span class="k">try</span><span class="p">:</span>
+                
+                <span class="n">trasformation_const</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">scores_path</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">opt_stim_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;_scores.hdf5&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)[</span><span class="s1">&#39;transformation_const_&#39;</span><span class="o">+</span><span class="n">score_function_ordered_list</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">)][:]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">all_scores</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="s2">&quot;../../scores&quot;</span><span class="p">)</span>
+                <span class="n">choice</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">all_scores</span><span class="p">)</span>
+                <span class="n">trasformation_const</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">scores_path</span><span class="o">+</span><span class="n">choice</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)[</span><span class="s1">&#39;transformation_const_&#39;</span><span class="o">+</span><span class="n">score_function_ordered_list</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">)][:]</span>
+                
+
+            <span class="c1">#TODO: why does this one cause bugs</span>
+            <span class="k">if</span> <span class="n">score_function_ordered_list</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;AP_rise_time&#39;</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="c1"># TODO: refactor traj score so its not sooooo slow</span>
+            <span class="k">if</span> <span class="s2">&quot;traj&quot;</span> <span class="ow">in</span> <span class="n">score_function_ordered_list</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">):</span>
+                <span class="k">continue</span>  
+            
+            
+            <span class="n">argDict</span> <span class="o">=</span> <span class="p">{</span>   <span class="s2">&quot;i&quot;</span><span class="p">:</span> <span class="n">i</span><span class="p">,</span>
+                <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="n">j</span><span class="p">,</span>
+                <span class="s2">&quot;curr_data_volt&quot;</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_volts_list</span><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="n">nGpus</span><span class="p">,:,:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span> <span class="c1"># can be really big, like 1000,10000</span>
+                <span class="s2">&quot;curr_target_volt&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_volts_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span> <span class="c1"># 10k</span>
+                <span class="s2">&quot;curr_sf&quot;</span><span class="p">:</span> <span class="n">score_function_ordered_list</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">),</span>
+                <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">score_function_ordered_list</span><span class="p">)</span><span class="o">*</span><span class="n">i</span> <span class="o">+</span> <span class="n">j</span><span class="p">],</span>
+                <span class="s2">&quot;transformation&quot;</span><span class="p">:</span> <span class="n">trasformation_const</span><span class="p">,</span>
+                <span class="s2">&quot;dt&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">dts</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="c1">#TODO: revisit hacking this</span>
+                <span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">(),</span>
+                <span class="s1">&#39;logger&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span>
+            <span class="p">}</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">argDict</span><span class="p">)</span>
+        
+        <span class="c1">#f.close()</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">exs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">callPara</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="p">,</span><span class="n">args</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">)</span>
+        
+
+        <span class="n">res</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">res</span><span class="p">))</span> <span class="c1">########## important: map returns results with shape (# of sf stim pairs, nindv)</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;all evals took :&quot;</span> <span class="p">,</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">res</span><span class="p">[:,:]</span> 
+        <span class="n">prev_sf_idx</span> <span class="o">=</span> <span class="mi">0</span> 
+        <span class="c1"># look at key of each stim score pair to see how many stims to sum</span>
+        <span class="c1">#num_selected_stims = len(set([pair[0] for pair in fxnsNStims])) # not always using 8 stims</span>
+        <span class="n">last_stim</span> <span class="o">=</span> <span class="p">(</span><span class="n">run_num</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">nGpus</span> <span class="c1"># ie: 0th run last_stim = (0+1)*8 = 8</span>
+        <span class="n">first_stim</span> <span class="o">=</span> <span class="n">last_stim</span> <span class="o">-</span> <span class="n">nGpus</span> <span class="c1"># on the the last round this will be 24 - 8 = 16</span>
+        <span class="k">if</span> <span class="n">last_stim</span> <span class="o">&gt;</span> <span class="mi">18</span><span class="p">:</span>
+            <span class="n">last_stim</span> <span class="o">=</span> <span class="mi">18</span>
+        <span class="c1">#print(last_stim, first_stim, &quot;last and first&quot;)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">first_stim</span><span class="p">,</span> <span class="n">last_stim</span><span class="p">):</span>  <span class="c1"># iterate stims and sum</span>
+            <span class="n">num_sfs</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="mi">1</span> <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">fxnsNStims</span> <span class="k">if</span> <span class="n">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="n">i</span><span class="p">])</span> <span class="c1">#find how many sf indices for this stim</span>
+            <span class="c1">#print([pair for pair in fxnsNStims if pair[0]==i], &quot;pairs from : &quot;, run_num)</span>
+            <span class="c1">#print(fxnsNStims[prev_sf_idx:prev_sf_idx+num_sfs], &quot;Currently evaluating&quot;)</span>
+
+            <span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="n">nGpus</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">weighted_sums</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="n">prev_sf_idx</span><span class="p">:</span><span class="n">prev_sf_idx</span><span class="o">+</span><span class="n">num_sfs</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1">#print(prev_sf_idx, &quot;stim start idx&quot;, num_sfs, &quot;stim end idx&quot;)</span>
+                <span class="n">curr_stim_sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="n">prev_sf_idx</span><span class="p">:</span><span class="n">prev_sf_idx</span><span class="o">+</span><span class="n">num_sfs</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">curr_stim_sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">curr_stim_sum</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+                <span class="n">weighted_sums</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">weighted_sums</span><span class="p">,</span> <span class="n">curr_stim_sum</span> <span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="c1">#print(curr_stim_sum.shape,&quot; : cur stim sum SHAPE      &quot;, weighted_sums.shape, &quot;: weighted sums shape&quot;)</span>
+            <span class="n">prev_sf_idx</span> <span class="o">=</span> <span class="n">prev_sf_idx</span> <span class="o">+</span> <span class="n">num_sfs</span> <span class="c1"># update score function tracking index</span>
+        <span class="k">return</span> <span class="n">weighted_sums</span></div>
+
+
+
+    
+<div class="viewcode-block" id="hoc_evaluator.getVolts"><a class="viewcode-back" href="../../../NeuroGPU-EA.html#NeuroGPU_EA.python.hoc_evaluator_neuroGPU.hoc_evaluator.getVolts">[docs]</a>    <span class="k">def</span> <span class="nf">getVolts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">idx</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Helper function that gets volts from data and shapes them for a given stim index&#39;&#39;&#39;</span>
+        <span class="n">fn</span> <span class="o">=</span> <span class="n">vs_fn</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span>  <span class="nb">str</span><span class="p">(</span><span class="n">global_rank</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.dat&#39;</span>    <span class="c1">#&#39;.h5&#39; </span>
+        <span class="n">io_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">curr_volts</span> <span class="o">=</span>  <span class="n">nrnMread</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">fn</span> <span class="o">=</span> <span class="n">vs_fn</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span>  <span class="nb">str</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.dat&#39;</span>    <span class="c1">#&#39;.h5&#39; </span>
+            <span class="n">curr_volts</span> <span class="o">=</span>  <span class="n">nrnMread</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+        <span class="c1">#fn = vs_fn + str(idx) +  &#39;.dat&#39;    #&#39;.h5&#39;</span>
+        <span class="c1">#curr_volts =  nrnMread(fn)</span>
+        <span class="n">Nt</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">curr_volts</span><span class="p">)</span><span class="o">/</span><span class="n">ntimestep</span><span class="p">)</span>
+        <span class="n">shaped_volts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">curr_volts</span><span class="p">,</span> <span class="p">[</span><span class="n">Nt</span><span class="p">,</span><span class="n">ntimestep</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">shaped_volts</span></div>
+    
+    
+
+<div class="viewcode-block" id="hoc_evaluator.evaluate_with_lists"><a class="viewcode-back" href="../../../NeuroGPU-EA.html#NeuroGPU_EA.python.hoc_evaluator_neuroGPU.hoc_evaluator.evaluate_with_lists">[docs]</a>    <span class="k">def</span> <span class="nf">evaluate_with_lists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param_values</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;This function overrides the BPOP built in function. It is currently set up to run GPU tasks for each </span>
+<span class="sd">        stim in chunks based on number of GPU resources then stacks these results and sends them off to be</span>
+<span class="sd">        evaluated. It runs concurrently so that while nGpus are busy, results ready for evaluation are evaluated.</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        -------------------- </span>
+<span class="sd">        param_values: Population sized list of parameter sets to be ran through neruoGPU then scored and evaluated</span>
+<span class="sd">        </span>
+<span class="sd">        Return</span>
+<span class="sd">        --------------------</span>
+<span class="sd">        2d list of scalar scores for each parameter set w/ shape (nindv,1)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">global</span> <span class="n">nGpus</span> <span class="c1"># can we avoid thiss.....</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nindv</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">param_values</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_volts_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+
+        <span class="k">if</span> <span class="n">total_rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1">##### TODO: write a function to check for missing data?</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dts</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dts</span>  <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">convert_allen_data</span><span class="p">(</span><span class="n">opt_stim_name_list</span><span class="p">,</span> <span class="n">stim_file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dts</span><span class="p">)</span> <span class="c1"># reintialize allen stuff for clean run</span>
+            <span class="c1"># insert negative param value back in to each set</span>
+            <span class="n">param_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">param_values</span><span class="p">)</span>
+            <span class="n">param_values</span><span class="p">[:,:]</span> <span class="o">=</span> <span class="mi">0</span><span class="c1">#-param_values[:,1]</span>
+            
+       
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">param_values</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dts</span> <span class="o">=</span> <span class="kc">None</span>
+            
+         
+        <span class="bp">self</span><span class="o">.</span><span class="n">dts</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dts</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">param_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">comm</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">param_values</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+        
+        <span class="n">param_values</span><span class="p">,</span> <span class="n">total_indvs</span> <span class="o">=</span> <span class="n">divide_params</span><span class="p">(</span><span class="n">param_values</span><span class="p">,</span> <span class="n">global_size</span><span class="p">,</span> <span class="n">global_rank</span><span class="p">)</span> <span class="c1"># TODO: is this the right size? should be # of nodes       </span>
+        <span class="c1"># print(param_values.shape, &quot;PARAM VALUES SHAPE AFTER GLOBAL DIVIDE&quot;)</span>
+        <span class="n">allparams</span> <span class="o">=</span> <span class="n">allparams_from_mapping</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">param_values</span><span class="p">))</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">my_indvs</span> <span class="o">=</span> <span class="n">divide_params</span><span class="p">(</span><span class="n">param_values</span><span class="p">,</span> <span class="n">nGpus</span><span class="p">,</span> <span class="n">local_rank</span><span class="p">)</span> 
+        <span class="c1"># print(my_indvs.shape, f&quot;my indvs rank {total_rank}&quot;)</span>
+
+        
+        
+        <span class="n">nstims</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_stims</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opt_stim_list</span><span class="p">)</span> <span class="o">-</span>  <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opt_stim_list</span><span class="p">)</span> <span class="o">%</span> <span class="n">nGpus</span><span class="p">))</span> <span class="c1"># cut off stims that </span>
+        <span class="c1"># would make us do inefficient GPU batch</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;NSTIMS is: &quot;</span><span class="p">,</span> <span class="n">nstims</span><span class="p">)</span>
+        <span class="n">start_time_sim</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">p_objects</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">score</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">start_times</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># a bunch of timers</span>
+        <span class="n">end_times</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">eval_times</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">run_num</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">all_volts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">all_params</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">nGpus</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="n">nstims</span><span class="p">,</span> <span class="nb">len</span><span class="p">([</span><span class="n">devicenum</span> <span class="k">for</span> <span class="n">devicenum</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;CUDA_VISIBLE_DEVICES&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">devicenum</span> <span class="o">!=</span> <span class="s2">&quot;,&quot;</span><span class="p">]))</span>
+            
+
+        
+        <span class="c1">#start running neuroGPU</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nGpus</span><span class="p">):</span>
+            <span class="n">start_times</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">local_rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">p_objects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">run_model</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="p">[]))</span>
+         <span class="c1"># evlauate sets of volts and     </span>
+        <span class="c1"># p_objects = comm.bcast(p_objects, root=global_rank // nGpus)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">nstims</span><span class="p">):</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">i</span> <span class="o">%</span> <span class="p">(</span><span class="n">nGpus</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">local_rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">p_objects</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span> <span class="c1">#wait to get volts output from previous run then read and stack</span>
+                <span class="c1">#p_objects[i].kill()</span>
+            <span class="n">comm</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>
+     
+            
+            <span class="n">end_times</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ADDED END TIME for &quot;</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+            <span class="n">shaped_volts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getVolts</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            
+
+            <span class="k">if</span> <span class="n">idx</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data_volts_list</span> <span class="o">=</span> <span class="n">shaped_volts</span> <span class="c1">#start stacking volts</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data_volts_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_volts_list</span><span class="p">,</span> <span class="n">shaped_volts</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> 
+            <span class="c1">#first_batch = i &lt; nGpus # we only evaluate on first batch because we already started neuroGPU</span>
+            <span class="n">last_batch</span>  <span class="o">=</span> <span class="n">i</span> <span class="o">==</span> <span class="p">(</span><span class="n">nstims</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="c1"># True if we are on last iter</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="n">nstims</span> <span class="o">-</span> <span class="n">nGpus</span><span class="p">):</span>
+                <span class="n">start_times</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ADDED Start TIME for &quot;</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="n">nGpus</span><span class="p">,</span> <span class="s2">&quot;at &quot;</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span>
+                <span class="n">p_objects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">run_model</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="n">nGpus</span><span class="p">,</span> <span class="p">[]))</span> <span class="c1">#ship off job to neuroGPU for next iter</span>
+            <span class="k">if</span> <span class="n">idx</span> <span class="o">==</span> <span class="n">nGpus</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data_volts_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_volts_list</span><span class="p">,</span> <span class="p">(</span><span class="n">nGpus</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">total_indvs</span><span class="p">),</span><span class="n">ntimestep</span><span class="p">))[:,</span><span class="n">my_indvs</span><span class="p">,:]</span> <span class="c1"># ok</span>
+                <span class="n">eval_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">nGpus</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">targV</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_volts_list</span><span class="p">[:</span><span class="n">nGpus</span><span class="p">]</span> <span class="c1"># shifting targV and current dts</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">curr_dts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dts</span><span class="p">[:</span><span class="n">nGpus</span><span class="p">]</span> <span class="c1">#  so that parallel evaluator can see just the relevant parts</span>
+                    <span class="n">score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">map_par</span><span class="p">(</span><span class="n">run_num</span><span class="p">)</span> <span class="c1"># call to parallel eval</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">targV</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_volts_list</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="n">nGpus</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># i = 15, i-nGpus+1 = 8, i+1 = 16 </span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">curr_dts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dts</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="n">nGpus</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># so therefore we get range(8,16) for dts and targ vs</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;CALLING EVAL&quot;</span><span class="p">)</span>
+                    <span class="n">score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">score</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">map_par</span><span class="p">(</span><span class="n">run_num</span><span class="p">),</span><span class="n">axis</span> <span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="c1">#stacks scores by stim</span>
+                <span class="n">eval_end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+                <span class="n">eval_times</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eval_end</span> <span class="o">-</span> <span class="n">eval_start</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_volts</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">all_volts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_volts_list</span>
+                    <span class="n">all_params</span> <span class="o">=</span> <span class="n">param_values</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">all_volts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">all_volts</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">data_volts_list</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                
+                <span class="bp">self</span><span class="o">.</span><span class="n">data_volts_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+                <span class="n">run_num</span> <span class="o">+=</span> <span class="mi">1</span>
+                
+            <span class="k">elif</span> <span class="n">last_batch</span> <span class="ow">and</span> <span class="n">last_batch</span> <span class="o">&lt;</span> <span class="n">nGpus</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data_volts_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_volts_list</span><span class="p">,</span> <span class="p">(</span><span class="n">nGpus</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">total_indvs</span><span class="p">),</span><span class="n">ntimestep</span><span class="p">))[:,</span><span class="n">my_indvs</span><span class="p">,:]</span> <span class="c1"># ok</span>
+                <span class="n">eval_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">targV</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_volts_list</span><span class="p">[:</span><span class="n">nstims</span><span class="p">]</span> <span class="c1"># shifting targV and current dts</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">curr_dts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dts</span><span class="p">[:</span><span class="n">nstims</span><span class="p">]</span> <span class="c1">#  so that parallel evaluator can see just the relevant parts</span>
+                <span class="n">score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">map_par</span><span class="p">(</span><span class="n">run_num</span><span class="p">)</span> <span class="c1"># call to parallel eval</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data_volts_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+                <span class="n">eval_end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+                <span class="n">eval_times</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eval_end</span> <span class="o">-</span> <span class="n">eval_start</span><span class="p">)</span>
+        
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;average neuroGPU runtime: &quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">end_times</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">start_times</span><span class="p">)))</span>           
+
+        <span class="c1">####### ONLY USING GPU runtimes that don&#39;t intersect with eval</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;neuroGPU runtimes: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">end_times</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">start_times</span><span class="p">)))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;evaluation took: &quot;</span><span class="p">,</span> <span class="n">eval_times</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_gen</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;everything took: &quot;</span><span class="p">,</span> <span class="n">eval_end</span> <span class="o">-</span> <span class="n">start_time_sim</span><span class="p">)</span>
+        
+        
+        <span class="n">score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">score</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">score</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">score</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">final_score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">score</span><span class="p">)</span>
+        <span class="n">final_score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">item</span> <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="n">final_score</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">sublist</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+
+        
+        <span class="c1"># Minimum element indices in list </span>
+        <span class="c1"># Using list comprehension + min() + enumerate() </span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">final_score</span><span class="p">)</span> 
+
+        <span class="n">res</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">final_score</span><span class="p">)</span> <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="n">temp</span><span class="p">]</span> 
+        <span class="c1"># print(&quot;The Positions of minimum element : &quot; + str(res)) </span>
+        <span class="c1"># print(&quot;And that is : &quot;, final_score[res], &quot; from &quot;, global_rank)</span>
+        <span class="c1"># print(&quot;or is is: &quot;, np.min(final_score))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">final_score</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s2">&quot;SCORE SHAPE&quot;</span><span class="p">)</span>
+        
+        <span class="c1">#if global_rank == 0:</span>
+<span class="c1">#         self.logger.info(&quot;score &quot; + str(self.num_gen) +  &quot; : &quot;  + str(final_score[res]))</span>
+        <span class="k">if</span> <span class="n">total_rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;gen size : &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nindv</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;evaluation: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">eval_times</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;neuroGPU: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">end_times</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">start_times</span><span class="p">))[:</span><span class="n">nGpus</span><span class="p">]))</span>
+            <span class="c1"># ADDED below</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">3</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;neuroGPU ends: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">end_times</span><span class="p">))))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;neuroGPU starts: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">start_times</span><span class="p">))))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;gen&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_gen</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; took: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">eval_end</span> <span class="o">-</span> <span class="n">start_time_sim</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;score &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_gen</span><span class="p">)</span> <span class="o">+</span>  <span class="s2">&quot; : &quot;</span>  <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">final_score</span><span class="p">[</span><span class="n">res</span><span class="p">]))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;lap time: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()))</span>
+
+        <span class="n">comm</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>
+        
+
+        <span class="k">return</span> <span class="n">final_score</span></div></div>
+
+    
+
+    
+<span class="n">algo</span><span class="o">.</span><span class="n">_evaluate_invalid_fitness</span> <span class="o">=</span> <span class="n">hoc_evaluator</span><span class="o">.</span><span class="n">my_evaluate_invalid_fitness</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">EA_benchmarking</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../NeuroGPU-EA.html">NeuroGPU-EA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CoreNeuron-EA.html">CoreNeuron-EA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Neuron-EA.html">CoreNeuron-EA</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Alexander Ladd.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
