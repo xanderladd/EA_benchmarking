@@ -14,7 +14,7 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('../../'))
 # TODO: remove later
-sys.path.insert(0, '../../NeuroGPU_EA/python/')
+# sys.path.insert(0, '../../NeuroGPU_EA/python/')
 
 # -- Project information -----------------------------------------------------
 
