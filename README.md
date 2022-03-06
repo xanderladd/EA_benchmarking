@@ -1,0 +1,60 @@
+# EA_benchmarking
+
+## (Work In Progress) Documentation 
+- https://ea-benchmarking.readthedocs.io/en/latest/
+
+
+## Prerequisites
+- NEURON > 7.6 (see installation instructions [here](https://neuron.yale.edu/neuron/download).
+- CoreNeuron (see installation instructions [here](https://github.com/BlueBrain/CoreNeuron).
+- SLURM
+  - This is a limitation since it generally requires that you are running this code on a HPC cluster. If you'd like to try a version that doesn't require HPC, try [this repo](https://github.com/xanderladd/benchmarking_examples).
+  - If you do check out this sub-repo, please reach out to me at zladd@berkeley.edu and I am happy to help with any techinical issues in set up! Thank you.
+- NeuroGPU
+  - CUDA (10 >)
+  - GCC (8.3.0 >)   
+- Other requirements like (BluePyOpt)[https://github.com/BlueBrain/BluePyOpt] and (eFEL)[https://efel.readthedocs.io/en/latest/] are listed in requirements.tst
+
+## Installation
+  - `pip install requirements.txt`
+  - or `conda env create -f dot_env.yml`
+  - Then you'll need to compile neuroGPU on your system so:
+    - `cd NeuroGPU_EA/src`
+    -  `make clean` and then `make`
+
+## Running Experiments
+- We create text files like the one below to specify experiments and these plans can be found in: 
+  - (NeuroGPU_EA/plans/)[https://github.com/xanderladd/EA_benchmarking/tree/main/NeuroGPU_EA/plans],
+  -  (CoreNeuron_EA/plans)[https://github.com/xanderladd/EA_benchmarking/tree/main/CoreNeuron_EA/plans]
+  -  (Neuron_EA/plans)[https://github.com/xanderladd/EA_benchmarking/tree/main/Neuron_EA/plans]
+  -  They look like this:
+
+ ```
+nGens=1
+offspring=3000,3000,3000,3000,3000,3000,3000,3000,3000
+cpuTrials=80
+N=1,2,4,8,16,32,64,128,256
+n_stims=6,6,6,6,6,6,6,6,6
+n_sfs=20,20,20,20,20,20,20,20,20
+clean=False 
+ 
+ ```
+  - you can launch them by using: 
+  - [Neuron_EA/meta_chain.sh](https://github.com/xanderladd/EA_benchmarking/blob/main/Neuron_EA/meta_chain.sh)
+  - [NeuroGPU_EA/meta_chain.sh](https://github.com/xanderladd/EA_benchmarking/blob/main/NeuroGPU_EA/meta_chain.sh)
+  - [CoreNeuron_EA/meta_chain.sh](https://github.com/xanderladd/EA_benchmarking/blob/main/NeuroGPU_EA/meta_chain.sh)
+  - WARNING: this script will chain and submit a bunch of SLURM jobs. 
+    -  you can try running `sh weak_chain_jobs.sh plans/Compute_Fixed_and_Problem_Scales` to just run _one_ benchmark instead of all three.
+    
+ ## Plotting / Parsing Experiments
+ - `python plot_benchmarking.py --path **name of plan you want to process** --output_path outputs
+  - This will parse the output logs from the experiments and then consolidate the results in the outputs folder.
+  - If you want to compare between different experiments in different outputs folders you can use `meta_plot.py` which parses the outputs in subdirectories : `Neuron_EA`,  `NeuroGPU_EA` and `CoreNeuron_EA`.
+
+
+# TODO
+
+## Major
+- Consolidate all scripts into one folder. There is a hoc_evaluator and optimizer for each experiment type. As we generalize our benchmarking platform it will be good to consolidate all code for optimization, launching optimization and processing optimization.
+
+
