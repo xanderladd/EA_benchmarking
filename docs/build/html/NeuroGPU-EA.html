@@ -33,11 +33,11 @@
 
           <div class="body" role="main">
             
-  <section id="module-NeuroGPU_EA.python.optimize_parameters_genetic_alg">
-<span id="neurogpu-ea"></span><h1>NeuroGPU-EA<a class="headerlink" href="#module-NeuroGPU_EA.python.optimize_parameters_genetic_alg" title="Permalink to this headline">¶</a></h1>
+  <section id="module-NeuroGPU_EA.python.test">
+<span id="neurogpu-ea"></span><h1>NeuroGPU-EA<a class="headerlink" href="#module-NeuroGPU_EA.python.test" title="Permalink to this headline">¶</a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="NeuroGPU_EA.python.optimize_parameters_genetic_alg.get_parser">
-<span class="sig-prename descclassname"><span class="pre">NeuroGPU_EA.python.optimize_parameters_genetic_alg.</span></span><span class="sig-name descname"><span class="pre">get_parser</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/NeuroGPU_EA/python/optimize_parameters_genetic_alg.html#get_parser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#NeuroGPU_EA.python.optimize_parameters_genetic_alg.get_parser" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="NeuroGPU_EA.python.test.get_parser">
+<span class="sig-prename descclassname"><span class="pre">NeuroGPU_EA.python.test.</span></span><span class="sig-name descname"><span class="pre">get_parser</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/NeuroGPU_EA/python/test.html#get_parser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#NeuroGPU_EA.python.test.get_parser" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get parsed arguemnts from command line. Following arguments are
 :param continue: (bool) should EA continue from checkpoint
 :param checkpoint: (str) path to BluePyOpt formulated checkpoint
@@ -49,39 +49,44 @@
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="NeuroGPU_EA.python.optimize_parameters_genetic_alg.main">
-<span class="sig-prename descclassname"><span class="pre">NeuroGPU_EA.python.optimize_parameters_genetic_alg.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pool</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NeuroGPU_EA/python/optimize_parameters_genetic_alg.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#NeuroGPU_EA.python.optimize_parameters_genetic_alg.main" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="NeuroGPU_EA.python.test.main">
+<span class="sig-prename descclassname"><span class="pre">NeuroGPU_EA.python.test.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pool</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NeuroGPU_EA/python/test.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#NeuroGPU_EA.python.test.main" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run optimization for NeuroGPU-EA
 :param pool: (multiprocessing.pool) pool of cpu process is created before calling main. 
 This was necessary in ppc64le env. on summit.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="NeuroGPU_EA.python.optimize_parameters_genetic_alg.my_record_stats">
-<span class="sig-prename descclassname"><span class="pre">NeuroGPU_EA.python.optimize_parameters_genetic_alg.</span></span><span class="sig-name descname"><span class="pre">my_record_stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stats</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logbook</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gen</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">population</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">invalid_count</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NeuroGPU_EA/python/optimize_parameters_genetic_alg.html#my_record_stats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#NeuroGPU_EA.python.optimize_parameters_genetic_alg.my_record_stats" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="NeuroGPU_EA.python.test.my_record_stats">
+<span class="sig-prename descclassname"><span class="pre">NeuroGPU_EA.python.test.</span></span><span class="sig-name descname"><span class="pre">my_record_stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stats</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logbook</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gen</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">population</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">invalid_count</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NeuroGPU_EA/python/test.html#my_record_stats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#NeuroGPU_EA.python.test.my_record_stats" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update the statistics with the new population
 :param logbook: (deap.tools.logbook) DEAP logbook</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="NeuroGPU_EA.python.optimize_parameters_genetic_alg.my_update">
-<span class="sig-prename descclassname"><span class="pre">NeuroGPU_EA.python.optimize_parameters_genetic_alg.</span></span><span class="sig-name descname"><span class="pre">my_update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">halloffame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">history</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">population</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NeuroGPU_EA/python/optimize_parameters_genetic_alg.html#my_update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#NeuroGPU_EA.python.optimize_parameters_genetic_alg.my_update" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="NeuroGPU_EA.python.test.my_update">
+<span class="sig-prename descclassname"><span class="pre">NeuroGPU_EA.python.test.</span></span><span class="sig-name descname"><span class="pre">my_update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">halloffame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">history</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">population</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NeuroGPU_EA/python/test.html#my_update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#NeuroGPU_EA.python.test.my_update" title="Permalink to this definition">¶</a></dt>
 <dd><p>Custom update to bluepyopt / DEAP that allows us to save intermediate results
 by calling save_logs</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="NeuroGPU_EA.python.optimize_parameters_genetic_alg.save_logs">
-<span class="sig-prename descclassname"><span class="pre">NeuroGPU_EA.python.optimize_parameters_genetic_alg.</span></span><span class="sig-name descname"><span class="pre">save_logs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">best_indvs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">population</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NeuroGPU_EA/python/optimize_parameters_genetic_alg.html#save_logs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#NeuroGPU_EA.python.optimize_parameters_genetic_alg.save_logs" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="NeuroGPU_EA.python.test.save_logs">
+<span class="sig-prename descclassname"><span class="pre">NeuroGPU_EA.python.test.</span></span><span class="sig-name descname"><span class="pre">save_logs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">best_indvs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">population</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NeuroGPU_EA/python/test.html#save_logs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#NeuroGPU_EA.python.test.save_logs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save best individuals as a pickle file in best_indv_logs</p>
 </dd></dl>
 
-<span class="target" id="module-NeuroGPU_EA.python.hoc_evaluator_neuroGPU"></span><dl class="py class">
-<dt class="sig sig-object py" id="NeuroGPU_EA.python.hoc_evaluator_neuroGPU.hoc_evaluator">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">NeuroGPU_EA.python.hoc_evaluator_neuroGPU.</span></span><span class="sig-name descname"><span class="pre">hoc_evaluator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_stims</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_sfs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sf_module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'efel'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NeuroGPU_EA/python/hoc_evaluator_neuroGPU.html#hoc_evaluator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#NeuroGPU_EA.python.hoc_evaluator_neuroGPU.hoc_evaluator" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="NeuroGPU_EA.python.test.test">
+<span class="sig-prename descclassname"><span class="pre">NeuroGPU_EA.python.test.</span></span><span class="sig-name descname"><span class="pre">test</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/NeuroGPU_EA/python/test.html#test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#NeuroGPU_EA.python.test.test" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="NeuroGPU_EA.python.test.hoc_evaluator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">NeuroGPU_EA.python.test.</span></span><span class="sig-name descname"><span class="pre">hoc_evaluator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_stims</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_sfs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sf_module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'efel'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NeuroGPU_EA/python/test.html#hoc_evaluator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#NeuroGPU_EA.python.test.hoc_evaluator" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="py method">
-<dt class="sig sig-object py" id="NeuroGPU_EA.python.hoc_evaluator_neuroGPU.hoc_evaluator.evaluate_with_lists">
-<span class="sig-name descname"><span class="pre">evaluate_with_lists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param_values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NeuroGPU_EA/python/hoc_evaluator_neuroGPU.html#hoc_evaluator.evaluate_with_lists"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#NeuroGPU_EA.python.hoc_evaluator_neuroGPU.hoc_evaluator.evaluate_with_lists" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="NeuroGPU_EA.python.test.hoc_evaluator.evaluate_with_lists">
+<span class="sig-name descname"><span class="pre">evaluate_with_lists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param_values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NeuroGPU_EA/python/test.html#hoc_evaluator.evaluate_with_lists"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#NeuroGPU_EA.python.test.hoc_evaluator.evaluate_with_lists" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function overrides the BPOP built in function. It is currently set up to run GPU tasks for each 
 stim in chunks based on number of GPU resources then stacks these results and sends them off to be
 evaluated. It runs concurrently so that while nGpus are busy, results ready for evaluation are evaluated.
@@ -92,14 +97,14 @@ param_values: Population sized list of parameter sets to be ran through neruoGPU
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="NeuroGPU_EA.python.hoc_evaluator_neuroGPU.hoc_evaluator.getVolts">
-<span class="sig-name descname"><span class="pre">getVolts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NeuroGPU_EA/python/hoc_evaluator_neuroGPU.html#hoc_evaluator.getVolts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#NeuroGPU_EA.python.hoc_evaluator_neuroGPU.hoc_evaluator.getVolts" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="NeuroGPU_EA.python.test.hoc_evaluator.getVolts">
+<span class="sig-name descname"><span class="pre">getVolts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NeuroGPU_EA/python/test.html#hoc_evaluator.getVolts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#NeuroGPU_EA.python.test.hoc_evaluator.getVolts" title="Permalink to this definition">¶</a></dt>
 <dd><p>Helper function that gets volts from data and shapes them for a given stim index</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="NeuroGPU_EA.python.hoc_evaluator_neuroGPU.hoc_evaluator.map_par">
-<span class="sig-name descname"><span class="pre">map_par</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_num</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NeuroGPU_EA/python/hoc_evaluator_neuroGPU.html#hoc_evaluator.map_par"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#NeuroGPU_EA.python.hoc_evaluator_neuroGPU.hoc_evaluator.map_par" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="NeuroGPU_EA.python.test.hoc_evaluator.map_par">
+<span class="sig-name descname"><span class="pre">map_par</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_num</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NeuroGPU_EA/python/test.html#hoc_evaluator.map_par"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#NeuroGPU_EA.python.test.hoc_evaluator.map_par" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function maps out what stim and score function pairs should be mapped to be evaluated in parallel
 first it finds the pairs with the highest weights, the maps them and then adds up the score for each stim
 for every individual.</p>
@@ -108,15 +113,15 @@ for every individual.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="NeuroGPU_EA.python.hoc_evaluator_neuroGPU.hoc_evaluator.my_evaluate_invalid_fitness">
-<span class="sig-name descname"><span class="pre">my_evaluate_invalid_fitness</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">population</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NeuroGPU_EA/python/hoc_evaluator_neuroGPU.html#hoc_evaluator.my_evaluate_invalid_fitness"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#NeuroGPU_EA.python.hoc_evaluator_neuroGPU.hoc_evaluator.my_evaluate_invalid_fitness" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="NeuroGPU_EA.python.test.hoc_evaluator.my_evaluate_invalid_fitness">
+<span class="sig-name descname"><span class="pre">my_evaluate_invalid_fitness</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">population</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NeuroGPU_EA/python/test.html#hoc_evaluator.my_evaluate_invalid_fitness"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#NeuroGPU_EA.python.test.hoc_evaluator.my_evaluate_invalid_fitness" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate the individuals with an invalid fitness
 Returns the count of individuals with invalid fitness</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="NeuroGPU_EA.python.hoc_evaluator_neuroGPU.hoc_evaluator.old_top_SFs">
-<span class="sig-name descname"><span class="pre">old_top_SFs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_num</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NeuroGPU_EA/python/hoc_evaluator_neuroGPU.html#hoc_evaluator.old_top_SFs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#NeuroGPU_EA.python.hoc_evaluator_neuroGPU.hoc_evaluator.old_top_SFs" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="NeuroGPU_EA.python.test.hoc_evaluator.old_top_SFs">
+<span class="sig-name descname"><span class="pre">old_top_SFs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_num</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NeuroGPU_EA/python/test.html#hoc_evaluator.old_top_SFs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#NeuroGPU_EA.python.test.hoc_evaluator.old_top_SFs" title="Permalink to this definition">¶</a></dt>
 <dd><p>finds scoring functions w/ weight over 50 and pairs them with that stim and sends
 them to mapping function so that we will run so many processes
 Arguments
@@ -126,16 +131,16 @@ keep track of what stims we are picking out score functions for</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="NeuroGPU_EA.python.hoc_evaluator_neuroGPU.hoc_evaluator.run_model">
-<span class="sig-name descname"><span class="pre">run_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stim_ind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NeuroGPU_EA/python/hoc_evaluator_neuroGPU.html#hoc_evaluator.run_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#NeuroGPU_EA.python.hoc_evaluator_neuroGPU.hoc_evaluator.run_model" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="NeuroGPU_EA.python.test.hoc_evaluator.run_model">
+<span class="sig-name descname"><span class="pre">run_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stim_ind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NeuroGPU_EA/python/test.html#hoc_evaluator.run_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#NeuroGPU_EA.python.test.hoc_evaluator.run_model" title="Permalink to this definition">¶</a></dt>
 <dd><p>stim_ind: index to send as arg to neuroGPU 
 params: DEPRECATED remove</p>
 <p>p_object: process object that stops when neuroGPU done</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="NeuroGPU_EA.python.hoc_evaluator_neuroGPU.hoc_evaluator.top_SFs">
-<span class="sig-name descname"><span class="pre">top_SFs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_num</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_sfs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NeuroGPU_EA/python/hoc_evaluator_neuroGPU.html#hoc_evaluator.top_SFs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#NeuroGPU_EA.python.hoc_evaluator_neuroGPU.hoc_evaluator.top_SFs" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="NeuroGPU_EA.python.test.hoc_evaluator.top_SFs">
+<span class="sig-name descname"><span class="pre">top_SFs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_num</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_sfs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NeuroGPU_EA/python/test.html#hoc_evaluator.top_SFs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#NeuroGPU_EA.python.test.hoc_evaluator.top_SFs" title="Permalink to this definition">¶</a></dt>
 <dd><p>finds scoring functions w/ weight over 50 and pairs them with that stim and sends
 them to mapping function so that we will run so many processes
 Arguments
@@ -169,7 +174,7 @@ keep track of what stims we are picking out score functions for</p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">NeuroGPU-EA</a></li>
 <li class="toctree-l1"><a class="reference internal" href="CoreNeuron-EA.html">CoreNeuron-EA</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Neuron-EA.html">CoreNeuron-EA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Neuron-EA.html">Neuron-EA</a></li>
 </ul>
 
 <div class="relations">

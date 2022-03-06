@@ -1,0 +1,308 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Neuron_EA.optimize_parameters_genetic_alg &#8212; EA_benchmarking 1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for Neuron_EA.optimize_parameters_genetic_alg</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">bluepyopt</span> <span class="k">as</span> <span class="nn">bpop</span>
+
+
+<span class="c1"># when things are setup, make this a conditional import</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">hoc_evaluator_allen</span> <span class="k">as</span> <span class="nn">hoc_ev</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="k">pass</span>
+    
+<span class="c1">#import hoc_evaluator as hoc_ev</span>
+
+<span class="kn">import</span> <span class="nn">bluepyopt.deapext.algorithms</span> <span class="k">as</span> <span class="nn">algo</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">textwrap</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
+
+<span class="n">comm</span> <span class="o">=</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
+<span class="n">global_rank</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">Get_rank</span><span class="p">()</span>
+<span class="c1"># size = int(os.environ[&#39;SLURM_NNODES&#39;])</span>
+<span class="c1"># global_rank = int(os.environ[&#39;SLURM_PROCID&#39;])</span>
+
+
+<span class="kn">import</span> <span class="nn">logging.config</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">dictConfig</span><span class="p">({</span>
+    <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s1">&#39;disable_existing_loggers&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">})</span>
+
+<span class="kn">import</span> <span class="nn">logging.handlers</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">global_rank</span><span class="p">,</span>  <span class="s2">&quot;: MY GRANK&quot;</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">global_rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="s1">&#39;/global/cscratch1/sd/zladd/benchmarking/neuron_genetic_alg/runTimeLogs/&#39;</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;runTimeLogs/runTime.log&quot;</span>
+    <span class="c1"># your logging setup</span>
+    <span class="n">should_roll_over</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">RotatingFileHandler</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">backupCount</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">delay</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">should_roll_over</span><span class="p">:</span>  <span class="c1"># log already exists, roll over!</span>
+        <span class="n">handler</span><span class="o">.</span><span class="n">doRollover</span><span class="p">()</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+    <span class="c1">#logging.config.dictConfig({&#39;filename&#39;:filename, &#39;level&#39;: logging.DEBUG, &#39;disable_existing_loggers&#39;: True })</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;absolute start : &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span> <span class="o">+</span> <span class="s2">&quot; from rank&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">global_rank</span><span class="p">))</span>
+
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="kc">None</span>
+    
+    
+
+
+<span class="c1">#if size &gt; 1:</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;USING MPI : TRUE&quot;</span><span class="p">)</span>
+
+<span class="n">gen_counter</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">best_indvs</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">cp_freq</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">old_update</span> <span class="o">=</span> <span class="n">algo</span><span class="o">.</span><span class="n">_update_history_and_hof</span>
+
+
+
+
+
+<div class="viewcode-block" id="create_optimizer"><a class="viewcode-back" href="../../Neuron-EA.html#Neuron_EA.optimize_parameters_genetic_alg.create_optimizer">[docs]</a><span class="k">def</span> <span class="nf">create_optimizer</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    returns configured bluepyopt.optimisations.DEAPOptimisation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">ipyparallel</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">ipyparallel</span> <span class="kn">import</span> <span class="n">Client</span>
+        <span class="n">rc</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span><span class="n">profile</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;IPYTHON_PROFILE&#39;</span><span class="p">))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Using ipyparallel with </span><span class="si">%d</span><span class="s1"> engines&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">rc</span><span class="p">))</span>
+
+        <span class="n">lview</span> <span class="o">=</span> <span class="n">rc</span><span class="o">.</span><span class="n">load_balanced_view</span><span class="p">()</span>
+        <span class="n">dview</span> <span class="o">=</span> <span class="n">rc</span><span class="o">.</span><span class="n">direct_view</span><span class="p">()</span>
+        <span class="k">def</span> <span class="nf">mapper</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">it</span><span class="p">):</span>
+            <span class="n">dview</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">,</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">rc</span><span class="o">.</span><span class="n">ids</span><span class="p">))</span>
+            <span class="n">start_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="n">dview</span><span class="o">.</span><span class="n">map_sync</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">it</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Generation took&#39;</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">global_rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Generation took </span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">ret</span>
+
+        <span class="n">map_function</span> <span class="o">=</span> <span class="n">mapper</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">map_function</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">evaluator</span> <span class="o">=</span> <span class="n">hoc_ev</span><span class="o">.</span><span class="n">hoc_evaluator</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span>
+    <span class="n">seed</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;BLUEPYOPT_SEED&#39;</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
+    <span class="n">opt</span> <span class="o">=</span> <span class="n">bpop</span><span class="o">.</span><span class="n">optimisations</span><span class="o">.</span><span class="n">DEAPOptimisation</span><span class="p">(</span>
+        <span class="n">evaluator</span><span class="o">=</span><span class="n">evaluator</span><span class="p">,</span>
+        <span class="n">map_function</span><span class="o">=</span><span class="n">map_function</span><span class="p">,</span>
+        <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
+        <span class="n">eta</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+        <span class="n">mutpb</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+        <span class="n">cxpb</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">map_function</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">opt</span></div>
+
+
+<span class="k">def</span> <span class="nf">get_parser</span><span class="p">():</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+        <span class="n">formatter_class</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">RawDescriptionHelpFormatter</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s1">&#39;L5PC example&#39;</span><span class="p">,</span>
+        <span class="n">epilog</span><span class="o">=</span><span class="n">textwrap</span><span class="o">.</span><span class="n">dedent</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span><span class="se">\</span>
+<span class="s1">The folling environment variables are considered:</span>
+<span class="s1">    L5PCBENCHMARK_USEIPYP: if set, will use ipyparallel</span>
+<span class="s1">    IPYTHON_PROFILE: if set, used as the path to the ipython profile</span>
+<span class="s1">    BLUEPYOPT_SEED: The seed used for initial randomization</span>
+<span class="s1">        &#39;&#39;&#39;</span><span class="p">))</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--start&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--continu&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_false&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--checkpoint&#39;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Checkpoint pickle to avoid recalculation&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--offspring_size&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;number of individuals in offspring&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--max_ngen&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;maximum number of generations&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--responses&#39;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Response pickle file to avoid recalculation&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--analyse&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--compile&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--hocanalyse&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--seed&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Seed to use for optimization&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--ipyparallel&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Use ipyparallel&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--n_stims&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;number of stims to optimize over&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--n_sfs&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;number of score functions to use&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s1">&#39;--diversity&#39;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;plot the diversity of parameters from checkpoint pickle file&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-v&#39;</span><span class="p">,</span> <span class="s1">&#39;--verbose&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;verbose&#39;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;-v for INFO, -vv for DEBUG&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">parser</span>
+
+<span class="k">def</span> <span class="nf">my_update</span><span class="p">(</span><span class="n">halloffame</span><span class="p">,</span> <span class="n">history</span><span class="p">,</span> <span class="n">population</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">gen_counter</span><span class="p">,</span> <span class="n">cp_freq</span>
+    <span class="n">old_update</span><span class="p">(</span><span class="n">halloffame</span><span class="p">,</span> <span class="n">history</span><span class="p">,</span> <span class="n">population</span><span class="p">)</span>
+    <span class="n">best_indvs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">halloffame</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">gen_counter</span> <span class="o">=</span> <span class="n">gen_counter</span><span class="o">+</span><span class="mi">1</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Current generation: &quot;</span><span class="p">,</span> <span class="n">gen_counter</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">gen_counter</span><span class="o">%</span><span class="n">cp_freq</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">fn</span> <span class="o">=</span> <span class="s1">&#39;.pkl&#39;</span>
+        <span class="n">save_logs</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">best_indvs</span><span class="p">,</span> <span class="n">population</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">save_logs</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">best_indvs</span><span class="p">,</span> <span class="n">population</span><span class="p">):</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;./best_indv_logs/best_indvs_gen_&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">gen_counter</span><span class="p">)</span><span class="o">+</span><span class="n">fn</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span>
+    <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">best_indvs</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+    <span class="n">output</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">get_parser</span><span class="p">()</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="n">algo</span><span class="o">.</span><span class="n">_update_history_and_hof</span> <span class="o">=</span> <span class="n">my_update</span>
+<span class="c1">#     logging.basicConfig(level=(logging.WARNING,</span>
+<span class="c1">#                                 logging.INFO,</span>
+<span class="c1">#                                 logging.DEBUG)[args.verbose],</span>
+<span class="c1">#                                 stream=sys.stdout)</span>
+    <span class="n">opt</span> <span class="o">=</span> <span class="n">create_optimizer</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span>
+    <span class="n">pop</span><span class="p">,</span> <span class="n">hof</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">hst</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">max_ngen</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">max_ngen</span><span class="p">,</span>
+        <span class="n">offspring_size</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">offspring_size</span><span class="p">,</span>
+        <span class="n">continue_cp</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">continu</span><span class="p">,</span>
+        <span class="n">cp_filename</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">checkpoint</span><span class="p">,</span>
+        <span class="n">cp_frequency</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    
+    <span class="n">fn</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;_</span><span class="si">%d</span><span class="s2">_%b_%Y&quot;</span><span class="p">)</span>
+    <span class="n">fn</span> <span class="o">=</span> <span class="n">fn</span> <span class="o">+</span> <span class="s2">&quot;.pkl&quot;</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;best_indvs_final&quot;</span><span class="o">+</span><span class="n">fn</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span>
+    <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">best_indvs</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+    <span class="n">output</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="o">+</span><span class="n">fn</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span>
+    <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">log</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+    <span class="n">output</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;hst&quot;</span><span class="o">+</span><span class="n">fn</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span>
+    <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">hst</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+    <span class="n">output</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;hof&quot;</span><span class="o">+</span><span class="n">fn</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span>
+    <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">hof</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+    <span class="n">output</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;Hall of fame: &#39;</span><span class="p">,</span> <span class="n">hof</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;log: &#39;</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;History: &#39;</span><span class="p">,</span> <span class="n">hst</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;Best individuals: &#39;</span><span class="p">,</span> <span class="n">best_indvs</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+    <span class="n">exit</span><span class="p">()</span>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">EA_benchmarking</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../NeuroGPU-EA.html">NeuroGPU-EA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../CoreNeuron-EA.html">CoreNeuron-EA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Neuron-EA.html">Neuron-EA</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Alexander Ladd.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

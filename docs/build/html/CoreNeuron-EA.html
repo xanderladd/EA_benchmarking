@@ -15,7 +15,7 @@
     <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="CoreNeuron-EA" href="Neuron-EA.html" />
+    <link rel="next" title="Neuron-EA" href="Neuron-EA.html" />
     <link rel="prev" title="NeuroGPU-EA" href="NeuroGPU-EA.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -76,100 +76,6 @@ by calling save_logs</p>
 <dd><p>Save best individuals as a pickle file in best_indv_logs</p>
 </dd></dl>
 
-<span class="target" id="module-CoreNeuron_EA.python.hoc_evaluator_coreneuron"></span><dl class="py class">
-<dt class="sig sig-object py" id="CoreNeuron_EA.python.hoc_evaluator_coreneuron.Cell">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">CoreNeuron_EA.python.hoc_evaluator_coreneuron.</span></span><span class="sig-name descname"><span class="pre">Cell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CoreNeuron_EA/python/hoc_evaluator_coreneuron.html#Cell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CoreNeuron_EA.python.hoc_evaluator_coreneuron.Cell" title="Permalink to this definition">¶</a></dt>
-<dd><p>cell instantion for coreneuron. creates an instance of  a cADpyr232_L5_TTPC1_0fb1ca4724 cell.
-sets up a dummy stimulus at 2 picoAmps</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="CoreNeuron_EA.python.hoc_evaluator_coreneuron.Cell.update_params">
-<span class="sig-name descname"><span class="pre">update_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CoreNeuron_EA/python/hoc_evaluator_coreneuron.html#Cell.update_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CoreNeuron_EA.python.hoc_evaluator_coreneuron.Cell.update_params" title="Permalink to this definition">¶</a></dt>
-<dd><p>use vector of p params to change parameters in core neuron</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="CoreNeuron_EA.python.hoc_evaluator_coreneuron.hoc_evaluator">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">CoreNeuron_EA.python.hoc_evaluator_coreneuron.</span></span><span class="sig-name descname"><span class="pre">hoc_evaluator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_stims</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_sfs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sf_module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'efel'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CoreNeuron_EA/python/hoc_evaluator_coreneuron.html#hoc_evaluator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CoreNeuron_EA.python.hoc_evaluator_coreneuron.hoc_evaluator" title="Permalink to this definition">¶</a></dt>
-<dd><p>CoreNeuron hoc evaluator class
-Args</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">param pool</dt>
-<dd class="field-odd"><p>(multiprocessing.Pool) pool of cpu processers to use for multiprocessing. This parameter is deprecated on Cori (x86_64) but not on ppc64le.</p>
-</dd>
-<dt class="field-even">param n_stims</dt>
-<dd class="field-even"><p>(int) number of stimuli to use in EA</p>
-</dd>
-<dt class="field-odd">param n_sfs</dt>
-<dd class="field-odd"><p>(int) number of score functions to use in EA</p>
-</dd>
-<dt class="field-even">param sf_module</dt>
-<dd class="field-even"><p>(optional str) score function module to use in EA.</p>
-</dd>
-</dl>
-</div></blockquote>
-<dl class="py method">
-<dt class="sig sig-object py" id="CoreNeuron_EA.python.hoc_evaluator_coreneuron.hoc_evaluator.evaluate_with_lists">
-<span class="sig-name descname"><span class="pre">evaluate_with_lists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param_values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CoreNeuron_EA/python/hoc_evaluator_coreneuron.html#hoc_evaluator.evaluate_with_lists"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CoreNeuron_EA.python.hoc_evaluator_coreneuron.hoc_evaluator.evaluate_with_lists" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function overrides the BPOP built in function. It is currently set up to run GPU tasks for each 
-stim in chunks based on number of GPU resources then stacks these results and sends them off to be
-evaluated. It runs concurrently so that while nGpus are busy, results ready for evaluation are evaluated.
-Parameters
-——————– 
-param_values: Population sized list of parameter sets to be ran through neruoGPU then scored and evaluated</p>
-<p>2d list of scalar scores for each parameter set w/ shape (nindv,1)</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="CoreNeuron_EA.python.hoc_evaluator_coreneuron.hoc_evaluator.getVolts">
-<span class="sig-name descname"><span class="pre">getVolts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CoreNeuron_EA/python/hoc_evaluator_coreneuron.html#hoc_evaluator.getVolts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CoreNeuron_EA.python.hoc_evaluator_coreneuron.hoc_evaluator.getVolts" title="Permalink to this definition">¶</a></dt>
-<dd><p>Helper function that gets volts from data and shapes them for a given stim index</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="CoreNeuron_EA.python.hoc_evaluator_coreneuron.hoc_evaluator.make_target_volts">
-<span class="sig-name descname"><span class="pre">make_target_volts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">orig_params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt_stim_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CoreNeuron_EA/python/hoc_evaluator_coreneuron.html#hoc_evaluator.make_target_volts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CoreNeuron_EA.python.hoc_evaluator_coreneuron.hoc_evaluator.make_target_volts" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convience function to make target volts with some set of bawse parameters if needed. Not used currently.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="CoreNeuron_EA.python.hoc_evaluator_coreneuron.hoc_evaluator.map_par">
-<span class="sig-name descname"><span class="pre">map_par</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_num</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CoreNeuron_EA/python/hoc_evaluator_coreneuron.html#hoc_evaluator.map_par"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CoreNeuron_EA.python.hoc_evaluator_coreneuron.hoc_evaluator.map_par" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function maps out what stim and score function pairs should be mapped to be evaluated in parallel
-first it finds the pairs with the highest weights, the maps them and then adds up the score for each stim
-for every individual.</p>
-<p>run_num: the amount of times neuroGPU has ran for 8 stims</p>
-<p>2d list of scalar scores for each parameter set w/ shape (nindv,nstims)</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="CoreNeuron_EA.python.hoc_evaluator_coreneuron.hoc_evaluator.my_evaluate_invalid_fitness">
-<span class="sig-name descname"><span class="pre">my_evaluate_invalid_fitness</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">population</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CoreNeuron_EA/python/hoc_evaluator_coreneuron.html#hoc_evaluator.my_evaluate_invalid_fitness"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CoreNeuron_EA.python.hoc_evaluator_coreneuron.hoc_evaluator.my_evaluate_invalid_fitness" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluate the individuals with an invalid fitness
-Returns the count of individuals with invalid fitness</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="CoreNeuron_EA.python.hoc_evaluator_coreneuron.hoc_evaluator.top_SFs">
-<span class="sig-name descname"><span class="pre">top_SFs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_sfs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CoreNeuron_EA/python/hoc_evaluator_coreneuron.html#hoc_evaluator.top_SFs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CoreNeuron_EA.python.hoc_evaluator_coreneuron.hoc_evaluator.top_SFs" title="Permalink to this definition">¶</a></dt>
-<dd><p>finds scoring functions w/ weight over 50 and pairs them with that stim and sends
-them to mapping function so that we will run so many processes
-Arguments
-————————————————————–
-run_num: the number of times neuroGPU has ran for 8 stims,
-keep track of what stims we are picking out score functions for</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="CoreNeuron_EA.python.hoc_evaluator_coreneuron.run_model">
-<span class="sig-prename descclassname"><span class="pre">CoreNeuron_EA.python.hoc_evaluator_coreneuron.</span></span><span class="sig-name descname"><span class="pre">run_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CoreNeuron_EA/python/hoc_evaluator_coreneuron.html#run_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CoreNeuron_EA.python.hoc_evaluator_coreneuron.run_model" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function to run h.finitialize and psolve using parallel context from Coreneuron</p>
-</dd></dl>
-
 </section>
 
 
@@ -193,7 +99,7 @@ keep track of what stims we are picking out score functions for</p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="NeuroGPU-EA.html">NeuroGPU-EA</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">CoreNeuron-EA</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Neuron-EA.html">CoreNeuron-EA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Neuron-EA.html">Neuron-EA</a></li>
 </ul>
 
 <div class="relations">
@@ -201,7 +107,7 @@ keep track of what stims we are picking out score functions for</p>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="NeuroGPU-EA.html" title="previous chapter">NeuroGPU-EA</a></li>
-      <li>Next: <a href="Neuron-EA.html" title="next chapter">CoreNeuron-EA</a></li>
+      <li>Next: <a href="Neuron-EA.html" title="next chapter">Neuron-EA</a></li>
   </ul></li>
 </ul>
 </div>
