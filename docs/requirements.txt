@@ -30,7 +30,7 @@ dictdiffer==0.9.0
 distro==1.6.0
 docutils==0.17.1
 entrypoints==0.3
-efel==-4.0.4
+efel==4.0.4
 filelock==3.0.12
 future==0.18.2
 Glymur==0.8.19
