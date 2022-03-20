@@ -1,0 +1,16 @@
+{
+  "ssh": "",
+  "interface": "tcp://*",
+  "registration": 54743,
+  "control": 35303,
+  "mux": 58261,
+  "hb_ping": 37061,
+  "hb_pong": 47985,
+  "task": 53041,
+  "iopub": 48489,
+  "key": "3287b62e-626a25e95cb144d91da75512",
+  "location": "cori03",
+  "pack": "json",
+  "unpack": "json",
+  "signature_scheme": "hmac-sha256"
+}
