@@ -80,8 +80,11 @@ threshold = -10
 # else:
 #     SLURM_CPUS = int(os.environ['SLURM_JOB_CPUS_PER_NODE'][:1])\
 pid=0
-affinity = os.sched_getaffinity(pid)
-nCpus = len(affinity)
+# try:
+#     affinity = os.sched_getaffinity(pid)
+#     nCpus = len(affinity)
+# except:
+#     nCpus = 1
 # These constants exist for efel features
 time_stamps =  10000
 starting_time_stamp = 1000
