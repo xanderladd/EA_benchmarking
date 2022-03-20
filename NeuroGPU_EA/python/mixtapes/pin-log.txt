@@ -1,4 +1,0 @@
-Pin: pin-3.8-97896-e83b36f
-Copyright (c) 2003-2019, Intel Corporation. All rights reserved.
-A:  Source/pin/vm_u/vm_signal_impl_unix.cpp: NotifyThreadExit: 1833: assertion failed: _initialized
-

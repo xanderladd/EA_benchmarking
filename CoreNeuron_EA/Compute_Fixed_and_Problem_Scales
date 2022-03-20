@@ -1,8 +1,0 @@
-nGens=1
-offspring=2500,3000,3500,4000,4500,5000
-cpuTrials=42
-N=1,1,1,1,1,1
-n_stims=8,8,8,8,8,8
-n_sfs=20,20,20,20,20,20
-novel=False
-delete=False

@@ -1,7 +1,0 @@
-nGens=1
-offspring=500,500,500,500
-cpuTrials=42
-N=1,2,4,8
-n_stims=6,6,6,6
-n_sfs=20,40,80,160
-clean=False

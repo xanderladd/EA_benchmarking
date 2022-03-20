@@ -1,0 +1,9 @@
+.gitignore
+.readthedocs.yml
+README.md
+setup.py
+.ipynb_checkpoints/requirements-checkpoint.txt
+benchmark_ea.egg-info/PKG-INFO
+benchmark_ea.egg-info/SOURCES.txt
+benchmark_ea.egg-info/dependency_links.txt
+benchmark_ea.egg-info/top_level.txt

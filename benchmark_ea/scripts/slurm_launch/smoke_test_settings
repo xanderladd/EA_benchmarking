@@ -1,0 +1,7 @@
+smoke_test=True
+offspring_size=38
+numNodes=1
+cores=80
+curr_cores=10
+n_stim=2
+n_sf=10
