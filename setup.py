@@ -23,7 +23,6 @@ def find_version(*file_paths):
 
 readme = open("README.md").read()
 version = 0
-# version = find_version("gpytorch", "__init__.py")
 
 
 
@@ -43,15 +42,19 @@ setup(
     },
     # packages=find_packages(exclude=["test", "test.*"]),
     python_requires=">=3.6",
-    # install_requires=install_requires,
-    # extras_require={
-    #     "dev": ["black", "twine", "pre-commit"],
-    #     "docs": ["ipython", "ipykernel", "sphinx<3.0.0", "sphinx_rtd_theme", "nbsphinx", "m2r"],
-    #     "examples": ["ipython", "jupyter", "matplotlib", "scipy", "torchvision", "tqdm"],
-    #     "pyro": ["pyro-ppl>=1.0.0"],
-    #     "keops": ["pykeops>=1.1.1"],
-    #     "test": ["flake8==4.0.1", "flake8-print==4.0.0", "pytest", "nbval"],
-    # },
+    
+    pip install -e .
+
+    install_requires=[
+        'bluepyopt',
+        'mpi4py',
+        'h5py',
+        'scipy',
+        'ipfx',
+        'NEURON'
+    ]
+        
+
     test_suite="test",
     include_package_data=True
   
