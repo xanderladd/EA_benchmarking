@@ -1,0 +1,3 @@
+INFO:root:absolute start : 1647598377.733409 from rank0
+INFO:root:USING MPI : TRUE
+INFO:__main__:Run stopped because of stopping criteria: Max ngen
