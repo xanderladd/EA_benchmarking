@@ -24,3 +24,4 @@ x86_64
 **/__pycache__/**
 **/*ipython*/**
 !benchmark_ea/data/allen_data/*
+.ipynb_checkpoints/*
