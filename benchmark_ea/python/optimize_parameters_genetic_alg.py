@@ -1,5 +1,6 @@
 import bluepyopt as bpop
 import bluepyopt.deapext.algorithms as algo
+import bluepyopt.deapext.utils as utils
 import pickle
 import time
 import numpy as np
@@ -36,7 +37,7 @@ total_size = comm.Get_size()
 gen_counter = 0
 best_indvs = []
 cp_freq = 1
-old_update = algo._update_history_and_hof
+old_update = utils.update_history_and_hof
 
 
 
