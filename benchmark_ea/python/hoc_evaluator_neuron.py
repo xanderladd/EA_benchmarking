@@ -56,6 +56,7 @@ def evaluate_score_function(stim_name_list, target_volts_list, data_volts_list, 
         curr_data_volt = data_volts_list[i]
         curr_target_volt = target_volts_list[i]
         stims_hdf5 = h5py.File(stims_path, 'r')
+        if type(stim_name_list[i]) != str: stim_name_list[i] = stim_name_list[i].decode('ASCII')
         dt = stims_hdf5[stim_name_list[i]+'_dt'][0]
         curr_stim = stims_hdf5[stim_name_list[i]][:]
         curr_sf = score_function_ordered_list[j].decode('ascii')
