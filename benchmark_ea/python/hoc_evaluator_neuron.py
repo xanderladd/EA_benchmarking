@@ -29,6 +29,7 @@ def run_model(param_set, stim_name_list, max_stims):
         stims_hdf5 = h5py.File(stims_path, 'r')
         curr_stim = stims_hdf5[elem][:]
         total_params_num = len(param_set)
+        if type(elem) != str: elem = elem.decode('ASCII')
         dt = stims_hdf5[elem+'_dt']
         timestamps = np.array([dt for i in range(ntimestep)])
         h.curr_stim = h.Vector().from_python(curr_stim)
