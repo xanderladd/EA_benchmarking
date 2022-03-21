@@ -17,6 +17,7 @@
   - GCC (8.3.0 >)   
 - Other requirements like (BluePyOpt)[https://github.com/BlueBrain/BluePyOpt] and (eFEL)[https://efel.readthedocs.io/en/latest/] are listed in requirements.tst
 
+
 ## Installation
   -  `conda env create -f env.yml --name benchmarking_env` (preferred)
       - `conda activate benchmarking_env`
@@ -25,11 +26,12 @@
 
   - Then you'll need to compile NEURON/neuroGPU on your system so:
     - `sh compile_neuron.sh`
+    
 
 
 ## Run Demo Experiment
-    - `cd` into `scripts/slurm_launch/` 
-    - `sh neuron_batch_simple.sh`
+- `cd` into `scripts/slurm_launch/` 
+- `sh neuron_batch_simple.sh`
     
 ## Running Experiments
 - We create text files like the one below to specify experiments and these plans can be found in: 
