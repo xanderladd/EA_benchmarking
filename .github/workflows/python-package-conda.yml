@@ -6,8 +6,9 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [macos-latest, windows-latest]
+        os: [macos-latest]
         #[ubuntu-latest]
+        #windows-latest
         python: [3.8.5]
     runs-on: ${{ matrix.os }}
     
