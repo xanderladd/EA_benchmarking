@@ -16,4 +16,12 @@ mkdir outputs
 # nrnivmodl -coreneuron coreneuron_files
 
 
+
+echo "Compiling NeuroGPU"
+cd currDir
+cd benchmark_ea/data/NeuroGPU_EA/src/
+make
+mkdir outputs
+
+
 echo "Done"

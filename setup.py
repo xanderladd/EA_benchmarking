@@ -5,6 +5,7 @@ import os
 import re
 
 from setuptools import find_packages, setup
+import setuptools.command.build_py
 
 
 # Get version
