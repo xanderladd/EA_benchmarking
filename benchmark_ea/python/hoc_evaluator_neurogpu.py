@@ -25,6 +25,8 @@ import benchmark_ea.python.utils as utils
 
 
 def divide_params(param_values, size, rank):
+    if size == 1: # do not divide params with size = 1
+        return param_values
     myChunk = [(len(param_values) // size) * rank , (len(param_values) // size) * (rank + 1)]
     # this is a bit hacky, just tacks on last ind if we need to because the split isn't great
     # cleaning
@@ -57,6 +59,14 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
         self.orig_params = orig_params
         self.pmin = np.array((data[:,2]), dtype=np.float64)
         self.pmax = np.array((data[:,3]), dtype=np.float64)
+        
+        
+        ## log 10 bounds
+#         self.pmin = np.log10(np.abs(self.pmin.astype(float)))
+#         self.pmax = np.log10(np.abs(self.pmax.astype(float)))
+#         self.orig_params = np.abs(np.log10(self.orig_params))
+        
+        
         # make this a function
         self.fixed = {}
         self.params = []
@@ -74,7 +84,7 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
                     self.params.append(bpop.parameters.Parameter(self.orig_params[param_idx], bounds=(self.pmin[idx][0],self.pmax[idx][0]))) # this indexing is annoying... pmax and pmin weird shape because they are numpy arrays, see idx assignment on line 125... how can this be more clear
             else:
                 #self.fixed[param_idx] = self.orig_params[param_idx]
-                self.params.append(bpop.parameters.Parameter(66.56, bounds=(40,90)))
+                self.params.append(bpop.parameters.Parameter(66.56, bounds=(60,100)))
 
         self.weights = opt_weight_list
         self.opt_stim_list = [e for e in opt_stim_name_list if len(e) < 8 ]
@@ -212,6 +222,7 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
         for fxnNStim in fxnsNStims:
             i = fxnNStim[0]
             j = fxnNStim[1]
+            # print(score_function_ordered_list[j].decode('ascii'), self.weights[len(score_function_ordered_list)*i + j])
 #             f.create_dataset("data_volt{}{}".format(i,j), data=self.data_volts_list[i % nGpus,:,:].astype(np.float32))
 #             f.create_dataset("target_volt{}{}".format(i,j), data=self.target_volts_list[i].astype(np.float32))
             
@@ -307,7 +318,10 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
         global nGpus # can we avoid thiss.....
 
         self.dts = []
+        # param_values = 10 ** np.array(param_values) #np.exp(np.array(param_values))
+        
         self.nindv = len(param_values)
+        
         self.data_volts_list = np.array([])
 
         if total_rank == 0:
@@ -316,26 +330,29 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
             self.dts  = utils.convert_allen_data(opt_stim_name_list, stim_file, self.dts) # reintialize allen stuff for clean run
             # insert negative param value back in to each set
             param_values = np.array(param_values)
-            param_values[:,:] = 0#-param_values[:,1]
+            
+            param_values[:,1] = -param_values[:,1]
             
        
         else:
             param_values = None
             self.dts = None
             
-         
+
         self.dts = comm.bcast(self.dts, root=0)
         param_values = np.array(comm.bcast(param_values, root=0))
         
         param_values, total_indvs = utils.divide_params(param_values, global_size, global_rank) # TODO: is this the right size? should be # of nodes       
         # print(param_values.shape, "PARAM VALUES SHAPE AFTER GLOBAL DIVIDE")
         allparams = allparams_from_mapping(list(param_values))
+        nGpus = 8
         _, my_indvs = utils.divide_params(param_values, nGpus, local_rank) 
-        # print(my_indvs.shape, f"my indvs rank {total_rank}")
-
         
         
-        nstims = min(self.n_stims, len(self.opt_stim_list) -  (len(self.opt_stim_list) % nGpus)) # cut off stims that 
+        # print(my_indvs, f"my indvs rank {local_rank}")
+        
+        nstims = self.n_stims
+        # nstims = min(self.n_stims, len(self.opt_stim_list) -  (len(self.opt_stim_list) % nGpus)) # cut off stims that 
         # would make us do inefficient GPU batch
         print("NSTIMS is: ", nstims)
         start_time_sim = time.time()
@@ -348,8 +365,6 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
         all_volts = []
         all_params = []
         nGpus = min(8,nstims, len([devicenum for devicenum in os.environ['CUDA_VISIBLE_DEVICES'] if devicenum != ","]))
-            
-
         
         #start running neuroGPU
         for i in range(0, nGpus):
@@ -367,19 +382,20 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
      
             
             end_times.append(time.time())
-            print("ADDED END TIME for ", i)
+            # print("ADDED END TIME for ", i)
             shaped_volts = self.getVolts(i)
             
 
             if idx == 0:
                 self.data_volts_list = shaped_volts #start stacking volts
             else:
+                print(np.max(self.data_volts_list), 'd volt max')
                 self.data_volts_list = np.append(self.data_volts_list, shaped_volts, axis = 0) 
             #first_batch = i < nGpus # we only evaluate on first batch because we already started neuroGPU
             last_batch  = i == (nstims - 1) # True if we are on last iter
             if not i >= (nstims - nGpus):
                 start_times.append(time.time())
-                print("ADDED Start TIME for ", i+nGpus, "at ", idx)
+                # print("ADDED Start TIME for ", i+nGpus, "at ", idx)
                 p_objects.append(self.run_model(i+nGpus, [])) #ship off job to neuroGPU for next iter
             if idx == nGpus-1:
                 self.data_volts_list = np.reshape(self.data_volts_list, (nGpus,len(total_indvs),ntimestep))[:,my_indvs,:] # ok
@@ -388,10 +404,11 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
                     self.targV = self.target_volts_list[:nGpus] # shifting targV and current dts
                     self.curr_dts = self.dts[:nGpus] #  so that parallel evaluator can see just the relevant parts
                     score = self.map_par(run_num) # call to parallel eval
+
                 else:
                     self.targV = self.target_volts_list[i-nGpus+1:i+1] # i = 15, i-nGpus+1 = 8, i+1 = 16 
                     self.curr_dts = self.dts[i-nGpus+1:i+1] # so therefore we get range(8,16) for dts and targ vs
-                    print("CALLING EVAL")
+                    print("CALLING EVAL SCORE SHAPE: ", score.shape)
                     score = np.append(score,self.map_par(run_num),axis =1) #stacks scores by stim
                 eval_end = time.time()
                 eval_times.append(eval_end - eval_start)
@@ -420,10 +437,8 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
         ####### ONLY USING GPU runtimes that don't intersect with eval
         print("neuroGPU runtimes: " + str(np.array(end_times) - np.array(start_times)))
         print("evaluation took: ", eval_times)
-
         self.num_gen += 1
         print("everything took: ", eval_end - start_time_sim)
-        
         
         score = np.reshape(np.sum(score,axis=1), (-1,1))
         score = comm.gather(score, root=0)
@@ -458,7 +473,6 @@ class hoc_evaluator(bpop.evaluators.Evaluator):
             self.logger.info("lap time: " + str(time.time()))
 
         comm.barrier()
-        
 
         return final_score
 

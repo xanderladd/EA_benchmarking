@@ -10,7 +10,8 @@ try:
 except:
     nGpus = 1
     print('no GPUs found... exiting')
-    
+
+print(nGpus, " : using nGPUs")
 comm = MPI.COMM_WORLD
 size = comm.Get_size()
 total_rank = comm.Get_rank()

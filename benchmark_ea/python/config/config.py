@@ -48,3 +48,19 @@ try:
 except:
     nGpus = 1
     
+    
+
+    
+## xander custom stim / weight list
+import numpy as np
+
+
+
+good_sfs = [b'AHP_depth', b'Spikecount', b'chi_square_normal', b'AP_height',  b'AP_duration', b'ISI_values', b'AP_width',b'fast_AHP',  b'AP_amplitude_from_voltagebase',b'AHP_time_from_peak',b'AP_fall_rate_change', b'AP_fall_time', b'AP_height',b'isi']
+good_stims = ['18','55_2','75']
+
+mask = np.isin(score_function_ordered_list,good_sfs)
+weight_list = np.ones(shape=(79))
+weight_list[mask] = 20
+opt_weight_list = np.tile(weight_list, len(good_stims))
+opt_stim_name_list = good_stims
